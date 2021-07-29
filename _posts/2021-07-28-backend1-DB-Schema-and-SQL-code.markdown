@@ -31,12 +31,12 @@ permalink: ":categories/backend/:title"
 1. 계좌 정보를 담게 되는 `Account`를 만듭니다.
 
     ```sql
-    Table accounts as A { #1
-        id bigserial [pk] #2
-        owner varchar #3
-        balance bigint #4
+    Table accounts as A { // #1
+        id bigserial [pk] // #2
+        owner varchar // #3
+        balance bigint // #4
         currency varchar
-        created_at timestamptz [default: `now()`] #5
+        created_at timestamptz [default: `now()`] // #5
     }
     ```
 
@@ -52,7 +52,7 @@ permalink: ":categories/backend/:title"
     ```sql
     Table entries {
         id bigserial [pk]
-        account_id bigint [ref: > A.id] #1
+        account_id bigint [ref: > A.id] // #1
         amount bigint
         created_at timestamptz [default: `now()`]
     }
