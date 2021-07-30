@@ -57,7 +57,7 @@ permalink: ":categories/backend/:title"
 
 #### Docker image 생성하기
 
-이 시리즈에서는 `PostgreSQL`을 DB Engine으로 사용하기 때문에 [Docker Hub](https://hub.docker.com/)에서 검색창에 `PostgreSQL`을 입력하여 맨 처음에 올라온 official 이미지 버전을 확인해 줍니다. 그리고 다시 터미널을 열고 다음과 같이 입력을 하여 이미지를 불러 옵니다.
+이 시리즈에서는 `PostgreSQL`을 DB Engine으로 사용하기 때문에 [Postgres Docker Hub](https://hub.docker.com/_/postgres)에들어가서 입력하여 사용할 이미지 버전을 확인해 줍니다. 그리고 다시 터미널을 열고 다음과 같이 입력을 하여 이미지를 불러 옵니다.
 
 입력:
 
@@ -65,7 +65,7 @@ permalink: ":categories/backend/:title"
     docker pull postgres:12-alpine
   ```
 
-출력:
+출력(이미지 불러오기 완료):
 
   ```zsh
     12-alpine: Pulling from library/postgres
@@ -83,3 +83,46 @@ permalink: ":categories/backend/:title"
   ```
 
 이 시리즈에서는 비교적 가벼운 `postgres 12-alpine`을 사용하여 이미지를 가져오겠습니다. `docker`에서 이미지를 가지고 오는 커멘드 syntax는 `docker pull <image>:<tag>` 입니다.
+
+이제 다시 `docker` 이미지를 확인해 보겠습니다. 
+
+입력:
+
+  ```zsh
+    docker images
+  ```
+
+출력:
+
+  ```zsh
+    REPOSITORY   TAG         IMAGE ID       CREATED       SIZE
+    postgres     12-alpine   7d6f672908a4   4 weeks ago   190MB
+  ```
+
+방금 추가한 `Postgres` 이미지가 보여집니다.
+
+---
+
+#### `Docker` Container 시작하기
+
+이제 컨테이너를 만들어서 추가된 `docker` 이미지를 실행시킬 수 있습니다. 1개의 이미지를 다양한 컨테이너에 추가하여 실행시킬 수 있습니다.
+
+컨테이너를 시작하기위해서 사용하는 커멘드라인 기본 syntax는 다음과 같습니다:
+
+  > docker run --name<컨테이너 이름> -e<환경 변수> -d <이미지>:<태그>
+
+`docker` 컨테이너는 새로운 가상환경에서 실행되기 때문에 현재 저희 컴퓨터에서 접속하는 `host network`와 분리되어 있습니다. 따라서 `docker` 컨테이너가 돌고 있는 port 5432로 연결하기 위해서는  환경변수 플래그인 `-e`앞에 `-p` 플래그를 추가하여 `Port Mapping`을 진행해 주어야 합니다.
+
+터미널에 입력해 봅니다.
+
+입력:
+
+  ```zsh
+     docker run --name postgres12 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+  ```
+
+출력:
+
+  ```zsh
+    29bb6c666adc4f271c64e2a6b73816431595da5c29253d741bdcb4eb4bb01643
+  ```
