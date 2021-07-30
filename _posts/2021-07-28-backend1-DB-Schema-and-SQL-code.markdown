@@ -28,6 +28,8 @@ permalink: ":categories/backend/:title"
 
 #### DB Struct 작성
 
+---
+
 1. 계좌 정보를 담게 되는 `Account`를 만듭니다.
 
     ```sql
