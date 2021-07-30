@@ -26,9 +26,9 @@ permalink: ":categories/backend/:title"
 
 본격적인 DB Struct 작성을 시작해 봅시다.
 
-#### DB Struct 작성
-
 ---
+
+#### DB Struct 작성
 
 1. 계좌 정보를 담게 되는 `Account`를 만듭니다.
 
@@ -106,6 +106,5 @@ permalink: ":categories/backend/:title"
     ```
 
 완성된 DB Schema:
-| ![DB Schema](./images/DB-Schema.png "DB Schema") |
-| :--: |
-| *Figure 1. Simple Bank DB Schema* |
+![DB Schema](./images/DB-Schema.png#center "DB Schema")
+*Figure 1. Simple Bank DB Schema*
