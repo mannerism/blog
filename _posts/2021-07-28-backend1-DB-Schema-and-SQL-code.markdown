@@ -57,12 +57,13 @@ permalink: ":categories/backend/:title"
     Table entries {
       id bigserial [pk]
       account_id bigint [not null, ref: > A.id] // #1
-      amount bigint [not null, note: '음수이거나 양수일 수 있습니다.']
+      amount bigint [not null, note: 'can be positive or negative.'] //#2
       created_at timestamptz [not null, default: `now()`]
     }
     ```
 
-    1. `account_id`라는 외부 키를 정의해 줍니다. `[ref: > A.id]`를 사용하여 이 값은 1번에서 정의한 `account`의 `id`를 참조한다는 것을 알려 줍니다. 이 필드를 통해서 1개의 계정에서 다수의 `entries`를 작성할 수 있게 됩니다. `note`를 추가하여 이 필드를 사용시 알아야하는 추가 정보를 입력해 줍니다.
+    1. `account_id`라는 외부 키를 정의해 줍니다. `[ref: > A.id]`를 사용하여 이 값은 1번에서 정의한 `account`의 `id`를 참조한다는 것을 알려 줍니다. 이 필드를 통해서 1개의 계정에서 다수의 `entries`를 작성할 수 있게 됩니다. 
+    1. `note`를 추가하여 이 필드를 사용시 알아야하는 추가 정보를 입력해 줍니다.
 
 3. 계좌간 이체내역 정보를 담는 `transfers`를 만듭니다.
 
@@ -71,7 +72,7 @@ permalink: ":categories/backend/:title"
       id bigserial [pk]
       from_account_id bigint [not null, ref: > A.id]
       to_account_id bigint [not null, ref: > A.id]
-      amount bigint [not null, note: '반드시 양수여야 합니다.'] // #1
+      amount bigint [not null, note: 'must be positive.'] // #1
       created_at timestamptz [not null, default: `now()`]
     }
     ```
@@ -156,4 +157,8 @@ CREATE INDEX ON "transfers" ("from_account_id");
 CREATE INDEX ON "transfers" ("to_account_id");
 
 CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");
+
+COMMENT ON COLUMN "entries"."amount" IS 'can be positive or negative';
+
+COMMENT ON COLUMN "transfers"."amount" IS 'must be positive';
 ```

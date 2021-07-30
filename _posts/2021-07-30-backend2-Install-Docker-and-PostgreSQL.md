@@ -87,7 +87,7 @@ permalink: ":categories/backend/:title"
     docker.io/library/postgres:12-alpine
   ```
 
-이 시리즈에서는 비교적 가벼운 `postgres 12-alpine`을 사용하여 이미지를 가져오겠습니다. 
+이 시리즈에서는 비교적 가벼운 `postgres 12-alpine`을 사용하여 이미지를 가져오겠습니다.
 
 이제 다시 `docker` 이미지를 확인해 보겠습니다.
 
@@ -235,9 +235,11 @@ permalink: ":categories/backend/:title"
 
 ---
 
-#### Table Plus 설치하기
+#### Table Plus 설치 및 세팅하기
 
 Table Plus 프로그램을 사용하여 DB 관리를 좀 쉽게 진행해 보겠습니다. 2021년 7월 30일 기준 몇번 사용하면 유료 구매를 권장하는 팝업이 좀 거슬리지만 한번 프로그램을 껏다가 키면 사라지니, 이번 시리즈에는 좀 참고 사용해 봅시다.
+
+##### Table Plus 설치
 
 1. [Table Plus Official 사이트](https://tableplus.com/)로 들어가서 각자 운영체제에 맞는 프로그램을 다운받고 프로그램을 설치해 줍니다.
 1. 설치가 완료 되면 프로그램을 실행 시키고 가운데 하단에 `Create a new connection`이란 조그만 버튼(왜 저렇게 작게 만들었는지 의문)을 클릭합니다.
@@ -251,3 +253,18 @@ Table Plus 프로그램을 사용하여 DB 관리를 좀 쉽게 진행해 보겠
 
 1. `Test` 버튼을 클릭하여 입력한 필드가 초록색으로 변하는지 확인 합니다.
 1. `Connect` 버튼을 클릭하여 연결을 완료합니다.
+
+##### Simple Bank.sql 파일 실행
+
+1. 시리즈 1 에서 만든 `Simple bank.sql`파일을 더블클릭하여 `Table Plus`로 `파일열기`를 진행합니다.
+1. `cmd` + `a` 키를 눌러서 전체 파일 내용을 선택합니다.
+1. `cmd` + `enter`키를 눌러 실행 시킵니다.
+1. `cmd` + `r` 키를 눌러 새로고침을 진행하면 좌측 패널에 3개의 테이블이 생성되는걸 확인할 수 있습니다.
+
+시리즈2 끝.
+
+##### 옵셔널: Table Plus Table 삭제하는 방법
+
+1. 추가된 테이블을 삭제하기 위해서는 좌측 `accounts`, `entries`, `transfers` 테이블을 전부 선택하고 마우스 우측클릭을 한 후 `delete`를 선택합니다.
+1. `Delete Tables` 창이 뜨고, `Cascade` 체크마크를 선택한 후에 `ok`버튼을 클릭해줍니다. `Cascade`를 선택해야지만 선택된 테이블이 참조하고있는 다른 참조 데이터가 삭제 됩니다.
+1. 선택 된 테이블이 빨간색으로 표시 되며, `cmd` + `s` 를 눌러 저장을 하면 삭제가 적용 됩니다.
