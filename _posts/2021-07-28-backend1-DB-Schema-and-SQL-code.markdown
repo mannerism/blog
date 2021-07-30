@@ -106,7 +106,7 @@ permalink: ":categories/backend/:title"
     ```
 
 완성된 DB Schema:
-![DB Schema](./images/DB-Schema.png#center "DB Schema")
+![DB Schema](./images/db-schema.png#center "DB Schema")
 *Figure 1. Simple Bank DB Schema*
 
 ---
