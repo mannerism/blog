@@ -106,4 +106,4 @@ permalink: ":categories/backend/:title"
     ```
 
 완선된 DB Schema:
-![image info][./image/DB-Schema.png]
+![DB Schema][./images/DB-Schema.png]
