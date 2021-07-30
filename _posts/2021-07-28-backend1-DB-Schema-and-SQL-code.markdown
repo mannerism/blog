@@ -32,15 +32,16 @@ permalink: ":categories/backend/:title"
 
     ```sql
     Table accounts as A { // #1
-        id bigserial [pk] // #2
-        owner varchar [not null] // #3
-        balance bigint [not null] // #4
-        currency varchar [not null]
-        created_at timestamptz [not null, default: `now()`] // #5
+      id bigserial [pk] // #2
+      owner varchar [not null] // #3
+      balance bigint [not null] // #4
+      currency varchar [not null]
+      created_at timestamptz [not null, default: `now()`] // #5
     }
     ```
 
     설명:
+
     1. `as` 키워드를 사용하여 `account`의 `Alias`를 `A`로 정의합니다.
     1. 모든 계좌마다 유니크한 ID를 부여하기 위해서 사용하는 type으로, auto-increment, 즉 자동으로 값이 올라가는 type을 사용합니다. PostgreSQL에서는 8-byte (64-bit, 1 에서 9223372036854775807까지) 사이즈의 `bigserial`이란 type을 사용할 수 있습니다. 자동으로 하나씩 올라가는 큰 숫자라고 이해하시면 됩니다. 그리고 `[pk]`를 사용하여 이 필드가 `Primary Key`라는 것을 알려줍니다.
     1. `varchar`을 사용하여 계좌 이름을 저장할 수 있게 해 줍니다.
@@ -52,10 +53,10 @@ permalink: ":categories/backend/:title"
 
     ```sql
     Table entries {
-        id bigserial [pk]
-        account_id bigint [not null, ref: > A.id] // #1
-        amount bigint [not null, note: '음수이거나 양수일 수 있습니다.']
-        created_at timestamptz [not null, default: `now()`]
+      id bigserial [pk]
+      account_id bigint [not null, ref: > A.id] // #1
+      amount bigint [not null, note: '음수이거나 양수일 수 있습니다.']
+      created_at timestamptz [not null, default: `now()`]
     }
     ```
 
@@ -65,11 +66,11 @@ permalink: ":categories/backend/:title"
 
     ```sql
     Table transfers {
-        id bigserial [pk]
-        from_account_id bigint [not null, ref: > A.id]
-        to_account_id bigint [not null, ref: > A.id]
-        amount bigint [not null, note: '반드시 양수여야 합니다.'] // #1
-        created_at timestamptz [not null, default: `now()`]
+      id bigserial [pk]
+      from_account_id bigint [not null, ref: > A.id]
+      to_account_id bigint [not null, ref: > A.id]
+      amount bigint [not null, note: '반드시 양수여야 합니다.'] // #1
+      created_at timestamptz [not null, default: `now()`]
     }
     ```
 
@@ -79,39 +80,25 @@ permalink: ":categories/backend/:title"
 
     ```sql
     Table accounts as A {
-        id bigserial [pk]
-        owner varchar [not null]
-        balance bigint [not null]
-        currency varchar [not null]
-        created_at timestamptz [not null, default: `now()`]
-
-    Indexes {
+      ...
+      Indexes {
         owner
       }
     }
 
     Table entries {
-    id bigserial [pk]
-    account_id bigint [not null, ref: > A.id]
-    amount bigint [not null]
-    created_at timestamptz [not null, default: `now()`]
-    
-    Indexes {
+      ...
+      Indexes {
         account_id
-    }
+      }
     }
 
     Table transfers {
-    id bigserial [pk]
-    from_account_id bigint [not null, ref: > A.id]
-    to_account_id bigint [not null, ref: > A.id]
-    amount bigint [not null]
-    created_at timestamptz [not null, default: `now()`]
-    
-    Indexes {
+    ...
+      Indexes {
         from_account_id
         to_account_id
         (from_account_id, to_account_id)
-    }
+      }
     }
     ```
