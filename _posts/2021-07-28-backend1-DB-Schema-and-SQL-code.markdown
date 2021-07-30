@@ -105,5 +105,5 @@ permalink: ":categories/backend/:title"
     }
     ```
 
-완선된 DB Schema:
-![DB Schema][./DB-Schema.jpg "DB Schema"]
+완성된 DB Schema:
+![DB Schema][./images/DB-Schema.png "DB Schema"]
