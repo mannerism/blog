@@ -5,7 +5,3 @@ permalink: /about/
 ---
 
 What about it?
-
-```
-code here
-```
