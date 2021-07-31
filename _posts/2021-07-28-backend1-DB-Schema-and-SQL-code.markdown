@@ -162,3 +162,5 @@ COMMENT ON COLUMN "entries"."amount" IS 'can be positive or negative';
 
 COMMENT ON COLUMN "transfers"."amount" IS 'must be positive';
 ```
+
+시리즈1 끝.
