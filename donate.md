@@ -4,4 +4,4 @@ title: Donate
 permalink: /donate/
 ---
 
-Donate by following my github page.
+[커피 한잔 사주러 가기](https://www.buymeacoffee.com/mannerism)
