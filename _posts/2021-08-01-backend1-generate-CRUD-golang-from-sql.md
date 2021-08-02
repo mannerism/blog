@@ -387,4 +387,68 @@ permalink: ":categories/backend/:title"
 
 비슷한 방법으로 `entries`와 `transfers`도 진행해 줍니다.
 
+#### `Entries` SQL Query 작성(Create, Read)
+
+1. `./db/query` 에 `entry.sql`파일 생성
+1. SQL Query입력
+
+    ```sql
+      -- name: CreateEntry :one
+      INSERT INTO entries (
+        account_id,
+        amount
+      ) VALUES (
+        $1, $2
+      )
+      RETURNING *;
+
+      -- name: GetEntry :one
+      SELECT * FROM entries
+      WHERE id = $1 
+      LIMIT 1;
+
+      -- name: ListEntries :many
+      SELECT * FROM entries
+      WHERE account_id = $1
+      ORDER BY id
+      LIMIT $2
+      OFFSET $3;
+    ```
+
+1. `make sqlc` 커멘드 진행
+1. `./db/sqlc`에 `entry.sql.go`파일 생성 확인
+
+#### `Transfers` SQL Query 작성(Create, Read)
+
+1. `./db/query` 에 `transfer.sql`파일 생성
+1. SQL Query입력
+
+    ```sql
+      -- name: CreateTransfer :one
+      INSERT INTO transfers (
+        from_account_id,
+        to_account_id,
+        amount
+      ) VALUES (
+        $1, $2, $3
+      )
+      RETURNING *;
+
+      -- name: GetTransfer :one
+      SELECT * FROM transfers
+      WHERE id = $1 LIMIT 1;
+
+      -- name: ListTransfers :many
+      SELECT * FROM transfers
+      WHERE
+        from_account_id = $1 OR
+        to_account_id = $2
+      ORDER BY id
+      LIMIT $3
+      OFFSET $4;
+    ```
+
+1. `make sqlc` 커멘드 진행
+1. `./db/sqlc`에 `transfer.sql.go`파일 생성 확인
+
 끝.
