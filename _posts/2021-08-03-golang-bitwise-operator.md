@@ -150,7 +150,7 @@ C 언어로 작성된 간단한 예시를 보고 설명을 해보겠습니다.
 
     ```
 
-1. `Left Shifting`은 결과값은  `첫번째 operand`x $2^{두번째 operand}$ 와 같습니다.
+1. `Left Shifting`은 결과값은 <img src="https://latex.codecogs.com/svg.latex?\&space;FirstOperand*2^{SecondOperand}" title="LeftShifting"/> 와 같습니다.
 
     ```C
       var = 3;   
@@ -178,7 +178,7 @@ C 언어로 작성된 간단한 예시를 보고 설명을 해보겠습니다.
 
     ```
 
-1. `Right Shifting`은 결과값은  $\frac { 첫번째 operand } { 2^{두번째 operand}  }$ 와 같습니다.
+1. `Right Shifting`은 결과값은 <img src="https://latex.codecogs.com/svg.latex?\&space;\frac{FirstOperand}{2^{SecondOperand} }" title="LeftShifting"/> 와 같습니다.
 
     ```C
       var = 3;   
