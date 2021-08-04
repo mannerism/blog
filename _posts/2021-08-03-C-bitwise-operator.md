@@ -1,10 +1,10 @@
 ---
-title:  "프로그래밍: Bitwise Operator 이해하기"
+title:  "C: Bitwise Operator 이해하기"
 date:   2021-08-03 12:27:19 +0900
 permalink: ":categories/programming/:title"
 ---
 
-### Golang: Bitwise Operator 이해하기
+### C: Bitwise Operator 이해하기
 
 >자료1. [Algorithms 101: the basics of Bit Manipulation explained](https://www.educative.io/blog/bit-manipulation-algorithm)
 >자료2. [Bitwise Operators in C](https://www.youtube.com/watch?v=8aFik6lPPaA&ab_channel=NesoAcademy)
@@ -189,3 +189,4 @@ C 언어로 작성된 간단한 예시를 보고 설명을 해보겠습니다.
       var >> 4;
       // 결과값 = (32 x 2^4) = 2
     ```
+  
