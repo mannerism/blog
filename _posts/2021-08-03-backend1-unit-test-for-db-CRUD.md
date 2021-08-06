@@ -20,7 +20,7 @@ permalink: ":categories/backend/:title"
 
       import "testing"
 
-      #1
+      // #1
       func TestCreateAccount(t *testing.T) {
 
       }
@@ -29,7 +29,7 @@ permalink: ":categories/backend/:title"
 
     1. `go`의 유닛 테스트 function signature는 `Test`로 시작해야 합니다. 그리고 `testing.T` 객체를 인풋으로 받습니다. 이 `T` 객체를 통해 테스트의 상태를 관리할 수 있습니다.
 
-`account.sql.go` 파일로 가서 테스트를 진행할 function을 살펴 보도록 합시다.
+이제 `account.sql.go` 파일로 가서 테스트를 진행할 function을 살펴 보도록 합시다.
   
   ```go
     func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
@@ -103,7 +103,7 @@ permalink: ":categories/backend/:title"
 입력:
 
   ```zsh
-    ➜  simplebank git:(master) ✗ go get github.com/lib/pq
+    go get github.com/lib/pq
   ```
 
 출력:
