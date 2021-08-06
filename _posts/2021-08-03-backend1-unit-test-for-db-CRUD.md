@@ -155,4 +155,3 @@ permalink: ":categories/backend/:title"
 #### 본격적인 유닛 테스트 작성
 
 이제 세팅은 완료가 되었습니다. 다시 `account_test.go`파일로 돌아가서 첫번째 유닛테스트를 작성해 보도록 하겠습니다.
-
