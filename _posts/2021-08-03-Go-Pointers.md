@@ -82,3 +82,43 @@ permalink: ":categories/programming/:title"
     21
     73
   ```
+
+#### Go Structs에서 포인터 사용
+
+Go 언어의 Struct에서도 포인터를 사용할 수 있습니다.
+
+```go
+  package main
+
+  import "fmt"
+
+  type Vertex struct {
+    X int
+    Y int
+  }
+
+  func main() {
+    v := Vertex{1, 2} // #1
+    p := &v           // #2
+    (*p).X = 1e9      // #3
+    fmt.Println(v)    // #4
+  }
+```
+
+설명:
+
+1. `v` 변수에 `Vertex` struct를 init해 줍니다.
+2. `v`에 도달하는 포인터를 변수 `p`를 `&`를 사용하여 init해 줍니다.
+3. `*`를 사용하여 포인터 변수 `p`를 통해 `v`의 `X`값을 변경해 줍니다.
+4. 새로운 `v`값을 콘솔에 프린트 해 줍니다. 결과값: `{1e9, 2}`
+
+3번같이 포인터를 사용하여 `v` struct 값을 바꾸는 경우 `*` 노테이션은 생략할 수 있습니다.
+
+```go
+    func main() {
+    v := Vertex{1, 2}
+    p := &v           
+    p.X = 1e9         
+    fmt.Println(v)    
+  }
+```
