@@ -196,7 +196,7 @@ DROP TABLE IF EXISTS transfers cascade;
 입력:
 
   ```zsh
-    docker start postgres12
+    docker ps
   ```
 
 출력:
