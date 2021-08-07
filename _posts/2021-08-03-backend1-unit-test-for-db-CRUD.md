@@ -265,24 +265,14 @@ permalink: ":categories/backend/:title"
 다음으로 `n`개의 `character`를 갖게되는 랜덤 스트링을 제공하는 function을 만들어 보겠습니다.
 
 ```go
-  // #1
-  const alphabet = "abcdefghijklmnopqrstuvwxyz"  
-
-  func RandomString(n int) string {
-    // #2
-    var sb strings.Builder
-    // #3
-    k := len(alphabet)
-
-    // #4
-    for i := 0; i < n; i++ {
-      // #5
-      c := alphabet[rand.Intn(k)]
-      // #6
-      sb.WriteByte(c)
+  const alphabet = "abcdefghijklmnopqrstuvwxyz"   // #1
+  func RandomString(n int) string {               // #2
+    var sb strings.Builder                        // #3
+    k := len(alphabet)                            // #4
+    for i := 0; i < n; i++ {                      // #5
+      c := alphabet[rand.Intn(k)]                 // #6
+      sb.WriteByte(c)                             // #7
     }
-
-    // #7
-    return sb.String()
+    return sb.String()                            // #8
   }
 ```
