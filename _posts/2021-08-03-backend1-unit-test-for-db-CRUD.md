@@ -96,7 +96,7 @@ permalink: ":categories/backend/:title"
 
 실패가 떴습니다. 메세지는 "db와 연결할 수 없습니다. 알 수 없는 driver입니다." 를 말하고 있습니다. 이 에러가 나타나는 이유는 `database/sql` 패키지가 SQL 데이터베이스의 기본적이 인터페이스만을 제공하기 때문입니다. 특정 `db driver` (우리의 경우 `postgres`)를 `db engine`으로 사용하기 위해 새로운 디펜던시를 설치해 주어야 합니다. 우리는 `lib/pq` 드라이버를 사용하도록 하겠습니다.
 
-#### lib/pq 디펜던시 설치하기
+#### lib/pq 설치하기
 
 [lib/pg](https://github.com/lib/pq)를 커맨드 라인을 사용하여 설치해 보도록 하겠습니다. 터미널을 열고 패키지를 설치해 줍니다.
 
@@ -152,6 +152,137 @@ permalink: ":categories/backend/:title"
     require github.com/lib/pq v1.10.2
   ```
 
-#### 본격적인 유닛 테스트 작성
+#### testify 설치하기
+
+[testify](https://github.com/stretchr/testify)를 커맨드라인을 사용하여 설치해 줍니다. `testify`를 사용하면 테스트 결과를 `if-else`구문 보다 간단하고 쉽게 확인할 수 있습니다. 터미널에 다음의 커멘드를 입력해 줍니다.
+
+  입력:
+  
+  ```zsh
+    go get github.com/stretchr/testify
+  ```
+  
+  출력:
+
+  ```zsh
+    go: downloading github.com/stretchr/testify v1.7.0
+    go: downloading github.com/pmezard/go-difflib v1.0.0
+    go: downloading github.com/davecgh/go-spew v1.1.0
+    go: downloading github.com/stretchr/objx v0.1.0
+    go: downloading gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+    go get: added github.com/stretchr/testify v1.7.0
+  ```
+
+`account_test.go`파일로 돌아가 `testify/require`패키지를 `import`해 줍니다.
+
+  ```go
+  import "github.com/stretchr/testify/require"
+  ```
+
+#### `CreateAccount()` 유닛 테스트 계속
 
 이제 세팅은 완료가 되었습니다. 다시 `account_test.go`파일로 돌아가서 첫번째 유닛테스트를 작성해 보도록 하겠습니다.
+
+```go
+  func TestCreateAccount(t *testing.T) {
+    // #1
+    arg := CreateAccountParams{
+      Owner:    "tom",
+      Balance:  100,
+      Currency: "USD",
+    }
+
+    // #2
+    account, err := testQueries.CreateAccount(context.Background(), arg)
+
+    // #3
+    require.NoError(t, err)
+    require.NotEmpty(t, account)
+
+    require.Equal(t, arg.Owner, account.Owner)
+    require.Equal(t, arg.Balance, account.Balance)
+    require.Equal(t, arg.Currency, account.Currency)
+
+    require.NotZero(t, account.ID)
+    require.NotZero(t, account.CreatedAt)
+  }    
+```
+
+1. 테스트에 사용할 `CreateAccountParams`를 새로 만들어줍니다.
+1. `CreateAccount()` function을 테스트해 봅니다. `Background()` context와 `#1`에서 생성한 `arg`를 인풋으로 넣어줍니다.
+1. `testify/require` 패키지에 포함 된 `NoError`, `NotEmpty`등과 같은 function을 사용하여 테스트 결과를 확인합니다.
+
+>주의: 테스트를 정상적으로 진행하기위해 `docker`가 돌아가고 있어야 합니다.
+
+이제 `account_test.go`에서 `run test`를 진행합니다.
+
+결과:
+
+```zsh
+  ok  github.com/mannerism/simplebank/db/sqlc (cached)
+```
+
+ 테스트가 정상적으로 돌아갑니다.
+
+ `main_test.go`파일 맨 위줄에 보이는 `run package test`를 클릭하면 본 패키지에 포함된 모든 유닛테스트를 실행하게 되며, 테스트가 완료 된 개별 function은 초록색으로 색깔이 칠해집니다. 그리고 코드 커버리지역시 콘솔에서 확인할 수 있습니다.
+
+```zsh
+  ok  github.com/mannerism/simplebank/db/sqlc 0.477s coverage: 6.5% of statements
+```
+
+#### 랜덤 값으로 유닛 테스트 진행
+
+`TestCreateAccount()`에 `arg`로 추가한 `CreateAccountParams`의 값으로 저희가 직접 값을 입력을 했지만, 이 값을 자동 생성하면 코드가 깔끔해지고 써야하는 코드가 적어진다는 장점이 있습니다. 그리고 테스트하는 값이 랜덤으로 생성되기 때문에 테스트간 충돌을 방지할 수도 있습니다.`simplebank/`폴더 안에 새로운 `util`폴더를 만들어줍니다. 그리고 `util`폴더 안에 `random.go`파일은 한개 생성해 줍니다.
+
+먼저 `init()` function 을 작성해 줍니다. 이 function은 `util`패키지가 처음 사용될 때 실행됩니다.
+
+  ```go
+    package util
+
+    func init() {
+      rand.Seed(time.Now().UnixNano())
+    }
+  ```
+
+`rand.Seed()`을 사용하여 seed 값을 입력해 줍니다. 보통 seed값은 현재 시간을 입력해 줍니다. `rand.Seed()`는 `int64`로 인풋값을 받기 때문에 우리는 현재 시간인 `time.Now()`를 `UnixNano()`를 사용해 `int64`로 변환해 줍니다.
+
+이렇게 되면 매번 다른 seed 값을 사용하게 되며 생성되는 값 역시 매번 달라지게 됩니다. 만약 `rand.Seed()`를 사용하지 않는다면 이 랜덤값 생성기는 seed값을 `1`이라 간주하고 매번 똑같은 값을 생성하게 됩니다.
+
+이제 random integer를 생성하는 function을 만들어 봅시다.
+
+  ```go
+    func RandomInt(min, max int64) int64 {
+      return min + rand.Int63n(max-min+1)
+    }
+  ```
+
+`RandomInt()` function은 두 개의 `int64`숫자인 `min`, `max`를 입력 받고 `min`과 `max`사이의 랜덤 `int64` 숫자를 리턴합니다.
+
+`rand.Int63n(n)` function은 `0`과 `n-1`사이의 랜덤 `int64` 숫자를 리턴 합니다. 따라서 `rand.Int63n(max-min+1)`은 `0`과 `max - min`사이의 랜덤 숫자를 리턴합니다.
+
+따라서, `min`을 마지막에 더해주게 되면 `min`과 `max`사이의 숫자가 리턴되게 됩니다.
+
+다음으로 `n`개의 `character`를 갖게되는 랜덤 스트링을 제공하는 function을 만들어 보겠습니다.
+
+```go
+  // #1
+  const alphabet = "abcdefghijklmnopqrstuvwxyz"  
+
+  func RandomString(n int) string {
+    // #2
+    var sb strings.Builder
+    // #3
+    k := len(alphabet)
+
+    // #4
+    for i := 0; i < n; i++ {
+      // #5
+      c := alphabet[rand.Intn(k)]
+      // #6
+      sb.WriteByte(c)
+    }
+
+    // #7
+    return sb.String()
+  }
+```
