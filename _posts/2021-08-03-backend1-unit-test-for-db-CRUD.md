@@ -230,6 +230,8 @@ permalink: ":categories/backend/:title"
   ok  github.com/mannerism/simplebank/db/sqlc 0.477s coverage: 6.5% of statements
 ```
 
+`TablePlus`에 있는 `simple_bank` `db`에도 테스트 값이 정상적으로 입력된걸 확인할 수 있습니다.
+
 #### 랜덤 값으로 유닛 테스트 진행
 
 `TestCreateAccount()`에 `arg`로 추가한 `CreateAccountParams`의 값으로 저희가 직접 값을 입력을 했지만, 이 값을 자동 생성하면 코드가 깔끔해지고 써야하는 코드가 적어진다는 장점이 있습니다. 그리고 테스트하는 값이 랜덤으로 생성되기 때문에 테스트간 충돌을 방지할 수도 있습니다.`simplebank/`폴더 안에 새로운 `util`폴더를 만들어줍니다. 그리고 `util`폴더 안에 `random.go`파일은 한개 생성해 줍니다.
@@ -285,3 +287,212 @@ permalink: ":categories/backend/:title"
 1. `rand.Intn(k)`를 사용하여 `0` 와 `k-1`사이의 랜덤 포지션 값을 생성해 줍니다. 그리고 해당 포지션의 `character`를 `c`변수에 저장합니다.
 1. 매 `loop iteration`마다 랜덤으로 선택된 `character` `c`를 `sb.WriteByte()`를 사용하여 string builder에 추가합니다.
 1. string builder에 추가된 `c`값들을 `sb.ToString()`를 사용하여 `string`으로 변환 후 리턴합니다.
+
+`RandomString()` function을 사용하여 랜덤 `owner`명을 만들어주는 function도 만들어 줍니다. `RandomOwner()`는 6개의 character를 갖는 랜덤 `owner`명을 생성합니다.
+
+```go
+  func RandomOwner() string {
+    return RandomString(6)
+  }    
+```
+
+ 그리고 `RandomInt()` function을 사용하여 랜덤 `money`를 만들어주는 function을 만들어 줍니다. `RandomMoney()`는 0 과 1000 사이의 랜덤 `int64`를 생성합니다.
+
+```go
+  func RandomMoney() int64 {
+    return RandomInt(0, 1000)
+  }
+```
+
+랜덤 `currency`를 생성하는 function도 하나 만들어 줍니다.
+
+```go
+  func RandomCurrency() string {
+    currencies := []string{"EUR", "USD", "CAD"} // #1
+    n := len(currencies)                        // #2
+    return currencies[rand.intn(n)]             // #3
+  }
+```
+
+1. `currencies` list를 `string slices` 형태로 만들어 줍니다.
+1. `len()`을 사용하여 `currencies`의 `length`를 `n`변수에 저장해 줍니다.
+1. `rand.intn()`을 사용하여 0 부터 n사이 랜덤 인덱스를 사용하여 1개의 통화를 `string`값으로 리턴해 줍니다.
+
+다시 `account_test.go`파일로 돌아가서 `CreateAccountParams`값을 방금 만든 랜덤값으로 변경해 줍니다.
+
+```go
+  func TestCreateAccount(t *testing.T) {
+    arg := CreateAccountParams{
+      Owner:    util.RandomOwner(),
+      Balance:  util.RandomMoney(),
+      Currency: util.RandomCurrency(),
+    }
+
+    ...
+  }
+```
+
+이제 다시 유닛 테스트를 실행하고 `TablePlus`를 새로고침하면 새롭게 랜덤값이 `simple_bank` `db`에 입력된것을 확인할 수 있습니다.
+
+이제 보다 쉽게 유닛테스트를 진행하기 위해 `Makefile`에 유닛 테스트 커맨드를 추가해 주겠습니다. 커멘드는 비교적 간단합니다. `go test` 커멘드를 사용하고 `-v`옵션을 추가하여 `verbose logs`를 활성화 시킵니다. 그리고 `-cover`옵션을 사용하여 `code coverage`를 활성화 합니다.
+
+```makefile
+  test:
+    go test -v -cover ./...
+```
+
+본 프로젝트에는 1개 이상의 패키지가 존재할 것이기 때문에 `./...` `argument`를 사용하여 모든 유닛테스트를 실행할 수 있습니다.
+
+터미널에 `make test`를 진행하면 `verbose`로그를 프린트하고 코드 커버리지를 콘솔에 보여주는걸 확인할 수 있습니다. 다시 `TablePlus`로 돌아가 새로운 테스트에 대한 기록이 잘 보이는지 확인해 줍니다.
+
+이제 나머지 `CRUD` operation에 대한 유닛 테스트 작성을 해 봅니다.
+
+#### GetAccount 유닛 테스트
+
+`GetAccount()`를 테스트하기 위해서는 우선 `CreateAccount()`가 선행되어야 합니다. 방금 전에 `CreateAccount()`를 테스트하며 새로운 `account`가 생겼지만, 모든 유닛테스트는 각각의 유닛 테스트로부터 독립된 테스트를 수행하는것이 가장 바람직합니다. 이는 프로젝트가 커지면서 수백개, 심지어 수천개의 유닛테스트를 진행하게 될 것인데 개별 유닛테스트가 서로의 결과에 영향을 주게되면 코드를 관리하기가 힘들뿐더러 유닛테스트 자체의 `integrity`, 즉 `신뢰도`가 매우 떨어지기 때문입니다.
+
+따라서 우리가 작성하는 각 테스트마다 새로운 `account`기록을 만들어 주겠습니다. 이를 위해 이미 작성된 `TestCreateAccount()` 코드를 따로 빼어 `createRandomAccount()` function으로 이동시켜 줍니다.
+
+```go
+  func createRandomAccount(t *testing.T) Account {
+    arg := CreateAccountParams{
+      Owner:    util.RandomOwner(),
+      Balance:  util.RandomMoney(),
+      Currency: util.RandomCurrency(),
+    }
+
+    account, err := testQueries.CreateAccount(context.Background(), arg)
+    require.NoError(t, err)
+    require.NotEmpty(t, account)
+
+    require.Equal(t, arg.Owner, account.Owner)
+    require.Equal(t, arg.Balance, account.Balance)
+    require.Equal(t, arg.Currency, account.Currency)
+
+    require.NotZero(t, account.ID)
+    require.NotZero(t, account.CreatedAt)
+
+    return account
+}
+```
+
+`createRandomAccount()`는 앞에 `Test`가 붙지 않기때문에 유닛 테스트를 실행하여도 실행이되지 않습니다. 또한, `c`가 소문자이기 때문에 `account_test.go` 파일 내부에서만 사용함을 알려줍니다. 추가로 `Account`를 리턴해 주도록하여 보다 다양한 유닛테스트 operation을 할 수 있도록 합니다.
+
+`TestCreateAccount()`역시 다음과 같이 수정해 줍니다.
+
+```go
+  func TestCreateAccount(t *testing.T) {
+    createRandomAccount(t)
+  }
+```
+
+이제 `createRandomAccount()`를 사용하여 `TestGetAccount()` 작성을 진행해 보겠습니다.
+
+```go
+  func TestGetAccount(t *testing.T) {
+    account1 := createRandomAccount(t) // #1
+    account2, err := testQueries.GetAccount(context.Background(), account1.ID) // #2
+    require.NoError(t, err) // #3
+    require.NotEmpty(t, account2) // #4
+
+    require.Equal(t, account1.ID, account2.ID) // #5
+    require.Equal(t, account1.Owner, account2.Owner) // #6
+    require.Equal(t, account1.Balance, account2.Balance) // #7
+    require.Equal(t, account1.Currency, account2.Currency) // #8
+    require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second) // #9
+}  
+```
+
+1. `createRandomAccount()`를 사용하여 `TestGetAccount()`에서 사용할 `account`를 만들어 줍니다. 이를 `account1` 변수에 저장합니다.
+1. `account2` 변수에 `GetAccount()`를 사용하여 리턴받은 `account`를 저장합니다. 이때 우리는 이미 1번에서 만들어 놓은 `account.ID`를 사용하여 `GET`을 진행합니다.
+1. `err`가 없는지 확인합니다.
+1. `account2`값이 비어있지 않은지 확인합니다.
+1. `account1.ID`와 `account2.ID`가 동일한지 확인합니다.
+1. `account1.Owner`와 `account2.Owner`가 동일한지 확인합니다.
+1. `account1.Balance`와 `account2.Balance`가 동일한지 확인합니다.
+1. `account1.Crrency`와 `account2.Currency`가 동일한지 확인합니다.
+1. `WithinDuration()`을 사용하여 `account1.CreatedAt` 값이 `account2.CreatedAt`값과 차이가 `time.Second` 즉 1초 내에 이루어 졌는지 확인합니다.
+
+#### UpdateAccount 유닛 테스트
+
+비슷한 방법으로 작성해 줍니다.
+
+```go
+  func TestUpdateAccount(t *testing.T) {
+    account1 := createRandomAccount(t)
+
+    // #1
+    arg := UpdateAccountParams{
+      ID:      account1.ID,
+      Balance: util.RandomMoney(),
+    }
+
+    account2, err := testQueries.UpdateAccount(context.Background(), arg)
+    require.NoError(t, err)
+    require.NotEmpty(t, account2)
+
+    require.Equal(t, account1.ID, account2.ID)
+    require.Equal(t, account1.Owner, account2.Owner)
+    require.Equal(t, arg.Balance, account2.Balance) //#2
+    require.Equal(t, account1.Currency, account2.Currency)
+    require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
+}
+```
+
+1. `UpdateAccount()`를 하기 위해 update를 진행할 `UpdateAccountParams`를 적어줍니다.
+1. 업데이트 될 `arg.Balance`가 `account2.Balance`에 잘 반영이 되었는지 확인해 줍니다.
+
+#### DeleteAccount 유닛 테스트
+
+```go
+  func TestDeleteAccount(t *testing.T) {
+    account1 := createRandomAccount(t)
+    err := testQueries.DeleteAccount(context.Background(), account1.ID)
+    require.NoError(t, err) // #1
+
+    account2, err := testQueries.GetAccount(context.Background(), account1.ID) // #2
+    require.Error(t, err)  // #3
+    require.EqualError(t, err, sql.ErrNoRows.Error()) // #4
+    require.Empty(t, account2) // #5
+}  
+```
+
+1. `DeleteAccount()` 진행이 정상적으로 이루어졌고 `err`가 없는지 확인합니다.
+1. 1번에서 삭제된 `account.ID`로 `GetAccount()`를 진행해 봅니다.
+1. 에러가 나는지 확인합니다.
+1. 에러의 종류가 `sql,ErrNoRows.Error()`가 맞는지 확인합니다.
+1. `GetAccount`에 실패했기 떄문에 `account2`가 비어있는지 확인합니다.
+
+#### ListAccounts 유닛 테스트
+
+```go
+  func TestListAccounts(t *testing.T) {
+    // #1
+    for i := 0; i < 10; i++ {
+      createRandomAccount(t)
+    }
+
+    // #2
+    arg := ListAccountsParams{
+      Limit:  5,
+      Offset: 5,
+    }
+
+    // #3
+    accounts, err := testQueries.ListAccounts(context.Background(), arg)
+    require.NoError(t, err)
+    require.Len(t, accounts, 5)
+
+    // #4
+    for _, account := range accounts {
+      require.NotEmpty(t, account)
+    }
+}
+```
+
+1. `ListAccount()`를 테스트하기 위해 1개 이상의 `account`가 필요합니다. 이 부분에 저희는 10개의 `account`를 `for-loop`을 사용하여 만들어 줍니다.
+1. 테스트를 진행할 `ListAccountsParams`를 `arg`에 저장합니다. `Limit: 5`는 리턴값을 5개로 제한한다는 조건입니다. `Offset: 5`은 순서대로 처음 5개를 건너뛰라는 조건입니다.
+1. 1번에서 총 10개의 `account`를 만들고 2번에서 5개의 `account` 리스트만 돌려달라는 조건으로 `ListAccounts()`를 실행시킵니다. 결과를 확인하기 위해 첫번째로 `err`가 없는지 확인합니다. 두번째로 리턴받은 `account` 리스트 갯수가 5개임을 확인합니다.
+1. 리턴받은 `account`리스트가 비어있지 않은지 확인 합니다.
+
+끝.
