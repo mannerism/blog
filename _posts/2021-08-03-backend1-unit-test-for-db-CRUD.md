@@ -6,7 +6,7 @@ permalink: ":categories/backend/:title"
 
 > 원문 출처: [Techschool](https://www.youtube.com/watch?v=rx6CPDK_5mU&list=PLy_6D98if3ULEtXtNSY_2qN21VCKgoQAE&ab_channel=TECHSCHOOL "Tech School")
 
-### 백엔드 시리즈 5. Golang Unit Test 작성하기 (미완성)
+### 백엔드 시리즈 5. Golang Unit Test 작성하기
 
 앞선 시리즈에서 만든 CRUD operation 코드에 대한 유닛 테스트를 작성해봅시다.
 
