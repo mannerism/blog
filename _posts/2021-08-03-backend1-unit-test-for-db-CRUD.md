@@ -269,6 +269,7 @@ permalink: ":categories/backend/:title"
   func RandomString(n int) string {               // #2
     var sb strings.Builder                        // #3
     k := len(alphabet)                            // #4
+
     for i := 0; i < n; i++ {                      // #5
       c := alphabet[rand.Intn(k)]                 // #6
       sb.WriteByte(c)                             // #7
@@ -276,3 +277,11 @@ permalink: ":categories/backend/:title"
     return sb.String()                            // #8
   }
 ```
+
+1. random string을 생성할 26 character 알파벳을 정의해줍니다.
+1. `string builder` 객체를 생성해 줍니다.
+1. 1번에서 정의한 총 알파벳 갯수를 `k` 변수에 저장합니다.
+1. `for-loop`을 사용하여 `n`개의 알파벳을 생성합니다.
+1. `rand.Intn(k)`를 사용하여 `0` 와 `k-1`사이의 랜덤 포지션 값을 생성해 줍니다. 그리고 해당 포지션의 `character`를 `c`변수에 저장합니다.
+1. 매 `loop iteration`마다 랜덤으로 선택된 `character` `c`를 `sb.WriteByte()`를 사용하여 string builder에 추가합니다.
+1. string builder에 추가된 `c`값들을 `sb.ToString()`를 사용하여 `string`으로 변환 후 리턴합니다.
