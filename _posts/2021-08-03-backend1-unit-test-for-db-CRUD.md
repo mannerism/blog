@@ -495,4 +495,168 @@ permalink: ":categories/backend/:title"
 1. 1번에서 총 10개의 `account`를 만들고 2번에서 5개의 `account` 리스트만 돌려달라는 조건으로 `ListAccounts()`를 실행시킵니다. 결과를 확인하기 위해 첫번째로 `err`가 없는지 확인합니다. 두번째로 리턴받은 `account` 리스트 갯수가 5개임을 확인합니다.
 1. 리턴받은 `account`리스트가 비어있지 않은지 확인 합니다.
 
-끝.
+#### `entry_test.go`
+
+```go
+package db
+
+import (
+  "context"
+  "testing"
+  "time"
+
+  "github.com/mannerism/simplebank/util"
+  "github.com/stretchr/testify/require"
+)
+
+func createRandomEntry(t *testing.T, accountId int64) Entry {
+  arg := CreateEntryParams{
+    AccountID: accountId,
+    Amount:    util.RandomMoney(),
+  }
+
+  entry, err := testQueries.CreateEntry(context.Background(), arg)
+  require.NoError(t, err)
+  require.NotEmpty(t, entry)
+
+  require.Equal(t, arg.AccountID, entry.AccountID)
+  require.Equal(t, arg.Amount, entry.Amount)
+
+  require.NotZero(t, entry.ID)
+  require.NotZero(t, entry.CreatedAt)
+
+  return entry
+}
+
+func TestCreateEntry(t *testing.T) {
+  account := createRandomAccount(t)
+  createRandomEntry(t, account.ID)
+}
+
+func TestGetEntry(t *testing.T) {
+  account := createRandomAccount(t)
+  entry1 := createRandomEntry(t, account.ID)
+  entry2, err := testQueries.GetEntry(context.Background(), entry1.ID)
+
+  require.NoError(t, err)
+  require.NotEmpty(t, entry2)
+
+  require.Equal(t, entry1.ID, entry2.ID)
+  require.Equal(t, entry1.AccountID, entry2.AccountID)
+  require.Equal(t, entry1.Amount, entry2.Amount)
+  require.WithinDuration(t, entry1.CreatedAt, entry2.CreatedAt, time.Second)
+}
+
+func TestListEntries(t *testing.T) {
+  account := createRandomAccount(t)
+  // Creating 10 random entries before testing `ListEntries`
+  for i := 0; i < 10; i++ {
+    createRandomEntry(t, account.ID)
+  }
+
+  arg := ListEntriesParams{
+    AccountID: account.ID,
+    Limit:     5,
+    Offset:    5,
+  }
+
+  entries, err := testQueries.ListEntries(context.Background(), arg)
+
+  require.NoError(t, err)
+  require.NotEmpty(t, entries)
+  require.Len(t, entries, 5)
+
+  for _, entry := range entries {
+    require.NotEmpty(t, entry)
+  }
+}
+```
+
+#### `transfer_test.go`
+
+```go
+package db
+
+import (
+  "context"
+  "testing"
+  "time"
+
+  "github.com/mannerism/simplebank/util"
+  "github.com/stretchr/testify/require"
+)
+
+func createRandomTransfer(t *testing.T, account1 Account, account2 Account) Transfer {
+  arg := CreateTransferParams{
+    FromAccountID: account1.ID,
+    ToAccountID:   account2.ID,
+    Amount:        util.RandomMoney(),
+  }
+
+  transfer, err := testQueries.CreateTransfer(context.Background(), arg)
+
+  require.NotEmpty(t, account1)
+  require.NotEmpty(t, account2)
+
+  require.NoError(t, err)
+  require.NotEmpty(t, transfer)
+
+  require.Equal(t, arg.FromAccountID, transfer.FromAccountID)
+  require.Equal(t, arg.ToAccountID, transfer.ToAccountID)
+  require.Equal(t, arg.Amount, transfer.Amount)
+  require.NotEmpty(t, transfer.ID)
+  require.NotEmpty(t, transfer.CreatedAt)
+
+  return transfer
+}
+
+func TestCreateTransfer(t *testing.T) {
+  account1 := createRandomAccount(t)
+  account2 := createRandomAccount(t)
+  createRandomTransfer(t, account1, account2)
+}
+
+func TestGetTransfer(t *testing.T) {
+  account1 := createRandomAccount(t)
+  account2 := createRandomAccount(t)
+  transfer1 := createRandomTransfer(t, account1, account2)
+  transfer2, err := testQueries.GetTransfer(context.Background(), transfer1.ID)
+
+  require.NoError(t, err)
+  require.NotEmpty(t, transfer2)
+
+  require.Equal(t, transfer1.ID, transfer2.ID)
+  require.Equal(t, transfer1.FromAccountID, transfer2.FromAccountID)
+  require.Equal(t, transfer1.ToAccountID, transfer2.ToAccountID)
+  require.Equal(t, transfer1.Amount, transfer2.Amount)
+  require.WithinDuration(t, transfer1.CreatedAt, transfer2.CreatedAt, time.Second)
+}
+
+func TestListTransfer(t *testing.T) {
+  account1 := createRandomAccount(t)
+  account2 := createRandomAccount(t)
+
+  for i := 0; i < 10; i++ {
+    createRandomTransfer(t, account1, account2)
+  }
+
+  arg := ListTransfersParams{
+    FromAccountID: account1.ID,
+    ToAccountID:   account2.ID,
+    Limit:         5,
+    Offset:        5,
+  }
+
+  transfers, err := testQueries.ListTransfers(context.Background(), arg)
+
+  require.NoError(t, err)
+  require.NotEmpty(t, transfers)
+  require.Len(t, transfers, 5)
+
+  for _, transfer := range transfers {
+    require.NotEmpty(t, transfer)
+  }
+}
+```
+
+끝
