@@ -6,7 +6,7 @@ permalink: ":categories/backend/:title"
 
 > 원문 출처: [Techschool](https://www.youtube.com/watch?v=rx6CPDK_5mU&list=PLy_6D98if3ULEtXtNSY_2qN21VCKgoQAE&ab_channel=TECHSCHOOL "Tech School")
 
-### 백엔드 시리즈 6. DB Transaction 작성하기
+### 백엔드 시리즈 6. DB Transaction 작성하기(미완성)
 
 이번 시리즈에서는 db transaction을 작성해 보겠습니다.
 
@@ -40,3 +40,22 @@ permalink: ":categories/backend/:title"
 - `I`: `Isolation` 분리. 동시다발적으로 이루어지는 `transaction`들은 서로 영향을 주지않도록 분리 되어있어야 합니다. `transaction`간 분리는 다양한 레벨로 나뉘어 지는데 언제 특정 `transaction`이 일으킨 변화가 외부에 공개 될지는 추후 천천히 알아보도록 합시다.
 
 - `D`: `Durability` 내구성. 성공적인 `transaction`을 통해 기록된 데이터는 시스템이 멈추더라고 계속 유지되어야 합니다.
+
+#### SQL DB Transaction 작성 순서
+
+1. `BEGIN` 문을 사용하여 `transaction`을 시작합니다.
+1. `SQL Queries`를 작성해 줍니다.
+1. 모든 작업이 성공이면 `COMMIT`문을 사용하여 영구적으로 기록합니다. 그러면 DB는 새로운 상태를 갖게 됩니다.
+1. 만약에 query가 실패한 경우, `ROLLBACK`문을 사용하여 수행된 모든 queries를 취소하고 이전의 상태로 돌려줍니다.
+
+#### DB Transaction을 `Go`로 작성하기.
+
+`store.go`라는 새로운 파일을 `db/sqlc`폴더에 만들어 줍니다. 그리고 `Store` struct를 작성해 줍니다.
+
+```go
+  type Store struct {
+
+  }
+```
+
+이 `Store`는 db queries를 수행하는 모든 function을 담게 돕니다.
