@@ -48,7 +48,7 @@ permalink: ":categories/backend/:title"
 1. 모든 작업이 성공이면 `COMMIT`문을 사용하여 영구적으로 기록합니다. 그러면 DB는 새로운 상태를 갖게 됩니다.
 1. 만약에 query가 실패한 경우, `ROLLBACK`문을 사용하여 수행된 모든 queries를 취소하고 이전의 상태로 돌려줍니다.
 
-#### DB Transaction을 `Go`로 작성하기.
+#### DB Transaction을 `Go`로 작성하기
 
 `store.go`라는 새로운 파일을 `db/sqlc`폴더에 만들어 줍니다. 그리고 `Store` struct를 작성해 줍니다.
 
