@@ -67,8 +67,8 @@ This document keeps all the performance enhancement tips related to QueenBee bac
 
 Note for `totalDocsExamined` and `nReturned`.
 
-```json
-  {
+```js
+{
   queryPlanner: {
     plannerVersion: 1,
     namespace: 'QUEENBEE.users',
@@ -175,3 +175,229 @@ Note for `totalDocsExamined` and `nReturned`.
 ```
 
 ### Creation of Index
+
+1. Pick a field that you want to add index on and create one
+
+   ```js
+   db.users.createIndex({ nickName: 1 });
+   ```
+
+   This will ensure that when you search by nickName you don’t have to run CollectionScan of entire documents. This will result in O(1)
+
+1. You can also create index of sub-documents
+
+   ```js
+   db.users.createIndex( { profile.height :1 } )
+   ```
+
+   This will ensure the faster search when you search by `profile.height`
+
+> NEVER ADD INDEX ON A FIELD THAT POINTS TO A SUB-DOCUMENT!! You should just add index directly to the sub-document field.
+
+### Explain()
+
+There are three types of explain()
+
+1. `queryPlanner`: see detail query info before executing
+2. `executionStats`: see detail query info when actually executing a query
+3. `allPlansExecution`: see most verbose query info when actually executing a query
+
+```js
+exp = db.people.explain("queryPlanner");
+expRun = db.people.explain("executionStats");
+expRunVerbose = db.people.explain("allPlansExecution");
+```
+
+### Performance Improvement Example 1.
+
+---
+
+#### Raw find() without any index
+
+Query:
+
+```js
+expRun.find({ last_name: "Johnson", "address.state": "New York" });
+```
+
+Explain() result:
+
+- `totalDocsExamined`: 50474
+- `nReturned`: 7
+- `examined-docs-to-returned-ratio`(D2R): 7200:1
+
+`note`: We want D2R to be closer to each other.
+
+```js
+{
+  queryPlanner: {
+
+...
+
+    winningPlan: {
+      stage: 'COLLSCAN',
+      filter: {
+        '$and': [
+          { 'address.state': { '$eq': 'New York' } },
+          { last_name: { '$eq': 'Johnson' } }
+        ]
+      },
+      direction: 'forward'
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 7,
+    executionTimeMillis: 28,
+    totalKeysExamined: 0,
+    totalDocsExamined: 50474,
+    executionStages: {
+      stage: 'COLLSCAN',
+      filter: {
+        '$and': [
+          { 'address.state': { '$eq': 'New York' } },
+          { last_name: { '$eq': 'Johnson' } }
+        ]
+      },
+
+...
+}
+```
+
+#### Raw find() with only `last_name` index
+
+1. add index of `last_name`
+
+   ```js
+   db.people.createIndex({ last_name: 1 });
+   ```
+
+1. run a query
+
+   ```js
+   expRun.find({ last_name: "Johnson", "address.state": "New York" });
+   ```
+
+Explain() result:
+
+- `totalDocsExamined`: 794
+- `nReturned`: 7
+- `examined-docs-to-returned-ratio`(D2R): 110:1
+
+`note`: A bit more enhanced query performance
+
+```js
+{
+  queryPlanner: {
+...
+    winningPlan: {
+      stage: 'FETCH',
+      filter: { 'address.state': { '$eq': 'New York' } },
+      inputStage: {
+        stage: 'IXSCAN',
+...
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 7,
+    executionTimeMillis: 2,
+    totalKeysExamined: 794,
+    totalDocsExamined: 794,
+...
+}
+```
+
+#### Raw find() with `last_name` and `address.state` index
+
+1. add index of `last_name` and `address.state`
+
+   ```js
+   db.people.createIndex({ "address.state": 1, last_name: 1 });
+   ```
+
+1. run a query
+
+   ```js
+   expRun.find({ last_name: "Johnson", "address.state": "New York" });
+   ```
+
+Explain() result:
+
+- `totalDocsExamined`: 7
+- `nReturned`: 7
+- `examined-docs-to-returned-ratio`(D2R): 1:1
+
+`note`: Best performance
+
+```js
+{
+  queryPlanner: {
+...
+    winningPlan: {
+      stage: 'FETCH',
+      inputStage: {
+        stage: 'IXSCAN',
+        keyPattern: { 'address.state': 1, last_name: 1 },
+        indexName: 'address.state_1_last_name_1',
+ ...
+      }
+    },
+    rejectedPlans: [
+      {
+        stage: 'FETCH',
+        filter: { 'address.state': { '$eq': 'New York' } },
+        inputStage: {
+          stage: 'IXSCAN',
+          keyPattern: { last_name: 1 },
+          indexName: 'last_name_1',
+  ...
+    ]
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 7,
+    executionTimeMillis: 0,
+    totalKeysExamined: 7,
+    totalDocsExamined: 7,
+ ...
+ ...
+}
+```
+
+### Sort.explain()
+
+Run `sort()` after `find()` and attach `explain()` at the end.
+
+```zsh
+> var res = db.people
+      .find( { "last_name":"Johnson", "address.state":"New York" } )
+      .sort( { "birthday":1 } )
+      .explain( "executionStats" )
+
+// Here we can just look at `executionStages`
+> res.executionStats.executionStages
+```
+
+Result:
+
+- note: execution order is IXSCAN > FETCH > SORT
+- When we are executing SORT in memory usage of 2950 occurred when memLimit is 33MB. This means that when we have a sort operation that exceeds 33MB, then the server will cancel that query. So we can predict whether the data will exceed 33MB limit by calculating the total based on how many documents we are returning and how big is each document.
+
+```js
+{
+  stage: 'SORT',
+  ...
+  memLimit: 33554432,
+  totalDataSizeSorted: 2950,
+  inputStage: {
+    stage: 'FETCH',
+ ...
+    inputStage: {
+      stage: 'IXSCAN',
+      nReturned: 7,
+ ...
+    }
+  }
+}
+```
