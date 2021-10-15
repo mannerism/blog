@@ -120,7 +120,7 @@ Note for `totalDocsExamined` and `nReturned`.
 
 Note for `totalDocsExamined` and `nReturned`.
 
-```json
+```js
 {
   queryPlanner: {
     plannerVersion: 1,
@@ -173,3 +173,5 @@ Note for `totalDocsExamined` and `nReturned`.
   operationTime: Timestamp({ t: 1634277299, i: 12 })
 }
 ```
+
+### Creation of Index
