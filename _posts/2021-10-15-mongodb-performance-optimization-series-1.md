@@ -401,3 +401,158 @@ Result:
   }
 }
 ```
+
+### Sorting with Indexes
+
+#### Example 1. Getting all documents after sorting on an indexed field of `ssn`
+
+1. create `explainable object` and run the `query` followed by `sort`
+
+   ```js
+   var exp = db.people.explain(`executionStats`);
+   exp
+     .find({}, { _id: 0, last_name: 1, first_name: 1, ssn: 1 })
+     .sort({ ssn: 1 });
+   ```
+
+1. result: we scanned about 50k documents with `IXSCAN(index scan)` because we retrieved all 50k documents.
+
+   ```js
+   winningPlan: {
+       inputStage: {
+         stage: 'FETCH',
+         inputStage: {
+           stage: 'IXSCAN',
+           keyPattern: { ssn: 1 },
+           ...
+         }
+       }
+   },
+   executionStats: {
+     executionSuccess: true,
+     nReturned: 50474,
+     executionTimeMillis: 94,
+     totalKeysExamined: 50474,
+     totalDocsExamined: 50474,
+     executionStages: { ... },
+   }
+   ```
+
+#### Example 2. Getting all documents after sorting on an unindexed field of `last_name`
+
+1. Run the `query` on `Unindexed` field `last_name` followed by `sort`
+
+   ```js
+   exp
+     .find({}, { _id: 0, last_name: 1, first_name: 1, ssn: 1 })
+     .sort({ first_name: 1 });
+   ```
+
+1. result: This time, we did not examine any index keys. Therefore, we performed `COLLSCAN` and `in-memory-sort` which is a quite expensive operation.
+
+   ```js
+   {
+     queryPlanner: {
+       winningPlan: {
+         stage: 'SORT',
+         sortPattern: { last_name: 1 },
+         memLimit: 33554432,
+         type: 'simple',
+         inputStage: {
+           stage: 'PROJECTION_SIMPLE',
+           transformBy: { _id: 0, last_name: 1, first_name: 1, ssn: 1 },
+           inputStage: { stage: 'COLLSCAN', direction: 'forward' }
+         }
+       },
+       rejectedPlans: []
+     },
+     executionStats: {
+         executionSuccess: true,
+         nReturned: 50474,
+         executionTimeMillis: 95,
+         totalKeysExamined: 0,
+         totalDocsExamined: 50474,
+     }
+   }
+   ```
+
+#### Example 3. Getting all documents after sorting after creating new index on `last_name`
+
+1. create new index on `last_name`
+
+   ```js
+   db.people.createIndex({ last_name: 1 });
+   ```
+
+1. run a query
+
+```js
+exp
+  .find({}, { _id: 0, last_name: 1, first_name: 1, ssn: 1 })
+  .sort({ last_name: 1 });
+```
+
+1. result: successfully ran `IXSCAN` without `in-memory-sort`
+
+```js
+{
+  queryPlanner: {
+    plannerVersion: 1,
+      stage: 'PROJECTION_SIMPLE',
+      transformBy: { _id: 0, last_name: 1, first_name: 1, ssn: 1 },
+      inputStage: {
+        stage: 'FETCH',
+        inputStage: {
+          stage: 'IXSCAN',
+          keyPattern: { last_name: 1 },
+        }
+      }
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 50474,
+    executionTimeMillis: 95,
+    totalKeysExamined: 50474,
+    totalDocsExamined: 50474,
+    ...
+  }
+}
+```
+
+#### Example 4. Getting matching documents after sorting with an indexed field
+
+1. run a query: We are scanning matching documents where `ssn` starts with `555` and `sort` by `ssn` in a decending order.
+
+   ```js
+   exp
+     .find({ ssn: /^555/ }, { _id: 0, last_name: 1, first_name: 1, ssn: 1 })
+     .sort({ ssn: -1 });
+   ```
+
+1. result: we did both `match` and `sort` using index keys
+
+   ```js
+   {
+     winningPlan: {
+       stage: 'PROJECTION_SIMPLE',
+       transformBy: { _id: 0, last_name: 1, first_name: 1, ssn: 1 },
+       inputStage: {
+         stage: 'FETCH',
+         inputStage: {
+           stage: 'IXSCAN',
+           keyPattern: { ssn: 1 }
+         }
+       }
+     },
+     executionStats: {
+       executionSuccess: true,
+       nReturned: 49,
+       executionTimeMillis: 0,
+       totalKeysExamined: 51,
+       totalDocsExamined: 49,
+       executionStages: {...}
+     }
+   }
+   ```
