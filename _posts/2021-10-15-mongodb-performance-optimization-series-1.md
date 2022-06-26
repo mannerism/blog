@@ -208,7 +208,7 @@ expRun = db.people.explain("executionStats");
 expRunVerbose = db.people.explain("allPlansExecution");
 ```
 
-### Performance Improvement Example 1.
+### Performance Improvement Example 1
 
 ---
 

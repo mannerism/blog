@@ -1,6 +1,6 @@
 ---
 title: "MongoDB Performance Optimization Part 2"
-date: 2021-08-21 08:15:00 +0900
+date: 2021-10-17 08:15:00 +0900
 permalink: ":categories/backend/:title"
 ---
 
