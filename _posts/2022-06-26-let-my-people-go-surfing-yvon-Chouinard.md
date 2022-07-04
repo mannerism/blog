@@ -23,3 +23,5 @@ permalink: ":categories/books/:title"
 1. When I'm working on a problem. I never think about beauty. I think only how to solve the problem. But when I have finished, if the solution is not beautiful, I know it is wrong. - Richard Buckminster Fuller
 
 1. Fashion is happening only now, and art is timeless.
+
+1. If you wait for the customer to tell you what to do, you're too late. My customers didn't want a model T, they wanted a faster horse.
