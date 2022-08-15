@@ -110,7 +110,7 @@ permalink: ":categories/backend/:title"
 DB-Schema.png "DB Schema")
 2
 <img src="{{ "images/DB-Schema.png" | prepend: site.baseurl | prepend: site.url}}" alt="Untitled" />
-![DB Schema](/mannerism_blog/_posts/images/db-schema.png)
+![DB Schema](/images/db-schema.png)
 
 ---
 
