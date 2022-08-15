@@ -108,8 +108,8 @@ permalink: ":categories/backend/:title"
 
 완성된 DB Schema:
 DB-Schema.png "DB Schema")
-3
-![DB Schema](/assets/db-schema.png)
+4
+![DB Schema](/assets/dbschema.png)
 
 ---
 
