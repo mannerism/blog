@@ -108,7 +108,7 @@ permalink: ":categories/backend/:title"
 
 완성된 DB Schema:
 ![DB Schema](https://raw.githubusercontent.com/mannerism/blog/gh-pages/_posts/images/DB-Schema.png "DB Schema")
-![DB Schema](/blog/_posts/images/DB-Schema.png "DB Schema")
+![DB Schema]({{site.baseurl}}/images/DB-Schema.png "DB Schema")
 _Figure 1. Simple Bank DB Schema_
 
 ---
