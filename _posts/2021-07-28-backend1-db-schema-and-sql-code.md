@@ -108,7 +108,8 @@ permalink: ":categories/backend/:title"
 
 완성된 DB Schema:
 DB-Schema.png "DB Schema")
-[DB Schema]({% link /images/DB-Schema.png %})
+2
+<img src="{{ "/images/DB-Schema.png" | prepend: site.baseurl | prepend: site.url}}" alt="Untitled" />
 
 ---
 
