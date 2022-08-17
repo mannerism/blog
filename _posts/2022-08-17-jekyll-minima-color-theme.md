@@ -1,6 +1,6 @@
 ---
 title: "How to change Jekyll minima color theme"
-date: 2022-08-18 11:00:19 +0900
+date: 2022-08-17 11:00:19 +0900
 permalink: ":categories/programming/:title"
 ---
 
