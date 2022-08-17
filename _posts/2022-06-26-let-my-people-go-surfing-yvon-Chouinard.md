@@ -31,4 +31,3 @@ permalink: ":categories/books/:title"
 1. Michael Kami refers to this team approach as concurrent, as opposed to assembly-line manufacturing, in which responsibility for one part of the process is handed off in stages to the next in line. A concurrent approach brings all participants together at the beginning of the design phase. As Dr. Kami points out, only about 10 percent of a product's costs are incurred during the design phase, but 90 percent of the costs are irrevocably committed.
 
 1. We do as much business as we can with as few suppliers and contractors as possible. The downside is the risk of becoming highly dependent on another company's performance. But that's exactly the position we want to be in because those companies are also dependent on us. Our potential success is linked. We become like friends, family, mutually selfish business partners; what's good for them is good for us.
-
