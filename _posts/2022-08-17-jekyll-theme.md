@@ -16,16 +16,17 @@ Select one of the themes that shows up in the result. For instance, `jekyll-them
 
 On the page, there is a `homepage` link on the bottom right corner. Click it to see the sample theme:
 
-![DB Schema](/blog/assets/2022-08-17-jekyll-theme/jekyll-theme-hacker.png)
+![rubygem](/blog/assets/2022-08-17-jekyll-theme/jekyll-theme-hacker.png)
 _Figure 1. Jekyll theme detail page_
 
 This will lead you to a github repo. Inside the github repo, click `preview the theme...`:
 
-![DB Schema](/blog/assets/2022-08-17-jekyll-theme/preview.png)
-_Figure 1. Jekyll theme github preview_
+![github](/blog/assets/2022-08-17-jekyll-theme/preview.png)
+_Figure 2. Jekyll theme github_
 
 See if you like the following `jekyll-theme-hacker`:
-![DB Schema](/blog/assets/2022-08-17-jekyll-theme/hacker-theme.png)
+![preview](/blog/assets/2022-08-17-jekyll-theme/hacker-theme.png)
+_Figure 2. Jekyll dark theme preview_
 
 Once you've found the theme you like, add the following line inside `Gemfile` of your project root folder:
 
