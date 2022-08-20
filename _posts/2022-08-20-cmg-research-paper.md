@@ -1,6 +1,6 @@
 ---
 title: "Study: Brain training using cognitive apps can improve cognitive performance and processing speed in older adults"
-date: 2022-08-17 09:51:19 +0900
+date: 2022-08-20 09:51:19 +0900
 permalink: ":categories/research/:title"
 ---
 
