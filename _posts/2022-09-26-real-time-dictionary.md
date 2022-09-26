@@ -13,7 +13,7 @@ I like to read books. I am talking about reading a real, paperback book while ly
 
 For now, the best solution is using my mobile phone. Apple recently announced `live text` functionality. [HERE](https://support.apple.com/en-us/HT212630). This allows real-time recognition of text from photos. Gotcha is, according to Apple, `To use Live Text, you need an iPhone XS, iPhone XR, or later with iOS 15 or later.`
 
-Using Apple's `Vision` framework will definitely make my life easy, but unfortunately I have iPhone 8+. I should look into using other OCR frameworks like `Tesseract` or any other [open-source OCR](https://www.hitechnectar.com/blogs/open-source-ocr-tools/).
+Using Apple's `Vision` framework will definitely make my life easy, but unfortunately I have iPhone 8+, [which isn't supported](https://nerdschalk.com/does-live-text-work-on-iphone-6-7-8-x-and-xs/). I should look into using other OCR frameworks like `Tesseract` or any other [open-source OCR](https://www.hitechnectar.com/blogs/open-source-ocr-tools/).
 
 Let's see these options first and see what I can use.
 
