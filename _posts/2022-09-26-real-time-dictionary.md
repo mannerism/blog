@@ -15,7 +15,7 @@ collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "
 
 But I don't yet 100% understand what are `.self`, `Self`, `.Self`, or even `self`. This post is about these `selves` in swift.
 
-## self with lowercase `s`
+## self with lowercase 's'
 
 This is a common lower-case `self` we often use inside `struct` or `class`. It means the variable is defined inside the `struct` or `class` at an outermost layer. Let's see an example:
 
@@ -35,7 +35,7 @@ class Fruit {
 
 > In Swift, the **self keyword refers to the current object inside the type that implements the object.** [Definition Reference](https://www.codingem.com/self-in-swift/)
 
-## Self with capital `S`
+## Self with capital 'S'
 
 > The **Self keyword is used in protocols to represent the type that is going to conform to the protocol.** [Definition Reference](https://www.codingem.com/self-in-swift/)
 
