@@ -1,96 +1,64 @@
 ---
 layout: post
-title: "Contemplating on making a real time dictionary"
-date: 2022-09-26 4:48:49 +0900
-categories: project
+title: "Self, self, .self. what the self? in Swift"
+date: 2022-09-27 4:48:49 +0900
+categories: study
 ---
 
-## Why
+## Intro
 
-I like to read books. I am talking about reading a real, paperback book while lying in my bed. While reading, I often come across words I don't know. When I read articles with my mobile phone, I can just long-press the word right on the screen and look up its definition quite easily, but when I am reading an actual book, I can't do that. The best possible way for me to do is first, open google, and then type in the word by each character, and click search. This to me is just too long a process to continuously repeat it while reading a book. This also breaks the flow of reading which sucks more than not knowing an exact meaning of the word. So, I plan to come up with a tool that can help me look up words while reading a book as easily as possible.
-
-## Possiblilty
-
-For now, the best solution is using my mobile phone. Apple recently announced `live text` functionality. [HERE](https://support.apple.com/en-us/HT212630). This allows real-time recognition of text from photos. Gotcha is, according to Apple, `To use Live Text, you need an iPhone XS, iPhone XR, or later with iOS 15 or later.`
-
-I thought about using different open-source softwares like [Tesseract](https://github.com/gali8/Tesseract-OCR-iOS) or [SwiftOCR](https://github.com/NMAC427/SwiftOCR), but boosting up the accuracy of `Tesseract` requires several layers of image processing and `SwiftOCR` is no longer maintained. `SwiftOCR` even recommends people to use Apple's `Vision` framework instead:
-
-> Please use Apple's Vision framework instead of SwiftOCR. It is very fast, accurate and much less finicky.
-
-So let's just not reinvent the wheel and go with the simplest solution. If this straight path won't get me the solution, I will have to dig up some additional, maybe a bit of hacky, ways to come up with a solution.
-
-## Apple's Vision Framework
-
-Let'a have a deeper look at what we can do with Vision Framework.
-
-Video: [Apple WWDC Talk on Vision Framework](https://developer.apple.com/videos/play/wwdc2021/10041/).
-Article: [Recognizing Text in Images](https://developer.apple.com/documentation/vision/reading_phone_numbers_in_real_time).
-
-There are two types of text-recognition in the framework:
-
-1. Fast
-   > The fast path uses the framework’s character-detection capabilities to find individual characters, and then uses a small machine learning model to recognize individual characters and words. This approach is similar to traditional optical character recognition (OCR).
-1. Accurate
-   > The accurate path uses a neural network to find text in terms of strings and lines, and then performs further analysis to find individual words and sentences. This approach is much more in line with how humans read text.
-
-### Fast
-
-We'll checkout some of the sample codes for fast recognition provided by Apple: [Sample Code](https://developer.apple.com/documentation/vision/reading_phone_numbers_in_real_time)
-
-This is the project structure:
-
-```md
-project
-| AppDelegate.swift
-| PreviewView.swift
-| ViewController.swift
-| VisionViewController.swift
-| StringUtils.swift
-```
-
-We will go over each swift file and try to dissect their functionalities in depth. Again, this is the `fast` version of text-recognition and it's programmatic approach is fundamentally different from `accurate` version.
-
-#### AppDelegate.swift
+OK. I've been programming `Swift` for quite some time now about 4 years and didn't really bother too much about `self`. Most of the my everyday coding life revolves around using `self.<some variable>`. Maybe a few `.self` when registering a cell class in `UICollectionView` for in `UITableView` like this:
 
 ```swift
-  import UIKit
-
-  @UIApplicationMain
-  class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-  }
+collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
 ```
 
-it's just an entry point of the app. Not much is there to dissect.
+But I don't yet 100% understand what are `.self`, `Self`, `.Self`, or even `self`. This post is about these `selves` in swift.
 
-#### PreviewView.swift
+## self with lowercase `s`
+
+This is a common lower-case `self` we often use inside `struct` or `class`. It means the variable is defined inside the `struct` or `class` at an outermost layer. Let's see an example:
 
 ```swift
-  import UIKit
-  import AVFoundation
-
-  class PreviewView: UIView {
-    // #1
-    var videoPreviewLayer: AVCaptureVideoPreviewLayer {
-      guard let layer = layer as? AVCaptureVideoPreviewLayer else {
-        fatalError("Expected `AVCaptureVideoPreviewLayer` type for layer. Check PreviewView.layerClass implementation.")
-      }
-      return layer
+class Fruit {
+    let name: String   // #1
+    let color: String
+    init(name: String, color: String) {
+        self.name = name // #2
+        self.color = color
     }
-    // #2
-    var session: AVCaptureSession? {
-      get {
-        return videoPreviewLayer.session
-      }
-      set {
-        videoPreviewLayer.session = newValue
-      }
-    }
-
-    // #3
-    // MARK: UIView
-    override class var layerClass: AnyClass {
-      return AVCaptureVideoPreviewLayer.self
-    }
-  }
+}
 ```
+
+1. variable `name` is defined at the outermost layer of the class `Fruit`
+2. inside `init(name: String, color: String)` function, `self.name` on the left side represents `name` defined in `#1` and `name` on the right side represents one of the argument variables in `init` function.
+
+> In Swift, the **self keyword refers to the current object inside the type that implements the object.** [Definition Reference](https://www.codingem.com/self-in-swift/)
+
+## Self with capital `S`
+
+> The **Self keyword is used in protocols to represent the type that is going to conform to the protocol.** [Definition Reference](https://www.codingem.com/self-in-swift/)
+
+Let's contemplate on this with an example:
+
+```swift
+protocol Callable {
+    func greet(_ other: Self)
+}
+
+struct Person : Callable {
+    func greet(_ other: Person) {
+        print("Hi, I am  \(other)")
+    }
+}
+```
+
+In swift, we define `protocol` so that other `types` can conform to it. For instance, if we have a `Person` struct that conforms to `Callable` protocol, the `Person` struct must implement `greet(_ other: Self)` function inside its body. That's what it means to _conform to a protocol_.
+
+So, when we conform to a protocol in a newly defined type, in this case `Person` struct, and if we want to reference the conforming type inside the function call `greet` we have to use `Self` keyword.
+
+Let's look at it in another angle one more time.
+
+When we define a `protocol` in `Swift`, we do not care about the types, like `classes` or `structs`, that will conform to this protocol. We shouldn't. That's the whole point of having a `protocol`, **a blueprint of methods, properties, and other requirements that suit a particular task or piece of functionality.**. We try to define generic functionalities in the protocol so that we can generalize and categorize what it means to use this specific type of protocol. Then when it is conformed by a class or a struct, detailed business logics are implemented inside the conforming class or struct.
+
+In this case, the protocol `Callable` wants its conforming type to implement `func greet()`. And inside the `greet` function, it wants the conforming type to use itself as an argument, shown as `(_ other: Self)`. Like I mentioned above, protocol doesn't give a shit about its conforming type. So it needs a generic way to refer to the conforming type. That's when `Self` comes in. Using `Self` inside the protocol, we can make sure that when a type conforms to the protocol, `Self` will 'transform' to the conforming type, in this case `Person` type, and this will allow us to use `Person` as the transformed version of the function: `greet(_ other: Person)`.
