@@ -101,3 +101,99 @@ it's just an entry point of the app. Not much is there to dissect.
 1. Default `CALayer` class is overridden with `AVCaptureVideoPreviewLayer`'s class. [Reference](https://developer.apple.com/documentation/uikit/uiview/1622626-layerclass)
 
 Basically, `PreviewView` class is creating a custom `UIView` class that uses `AVCaptureVideoPreviewLayer` as a main `layerClass`. [Reference](https://developer.apple.com/documentation/avfoundation/avcapturevideopreviewlayer)
+
+#### ViewController.swift
+
+```swift
+// #1
+import UIKit
+import AVFoundation
+import Vision
+
+// #2
+class ViewController: UIViewController {
+  ...
+}
+
+// #3
+// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
+  ...
+}
+
+// #4
+// MARK: - Utility extensions
+extension AVCaptureVideoOrientation {
+...
+}
+```
+
+Let's begin dissecting `ViewController` file. First, a bird-eye view of the whole file:
+
+1. We'll be using three frameworks: `UIKit`, `AVFoundation`, `Vision`
+1. All the global variables and functions will be located inside the main body
+1. `ViewController` extends `AVCaptureVideoDataOutputSampleBufferDelegate` what it does, according to the [Reference](https://developer.apple.com/documentation/avfoundation/avcapturevideodataoutputsamplebufferdelegate) is this:
+
+   > This protocol defines an interface for delegates of an AVCaptureVideoDataOutput **object to receive captured video sample buffers and be notified of late sample buffers that were dropped.**
+
+   In another words, this is where we receive captured video streams from the camera.
+
+1. Utility function that handles video orientation. Doesn't know fully until we dissect the inside logic.
+
+#### class ViewController: UIViewController {}
+
+Let's start with the `ViewController` class:
+
+```swift
+class ViewController: UIViewController {
+
+  // MARK: - UI objects
+  @IBOutlet weak var previewView: PreviewView!
+  @IBOutlet weak var cutoutView: UIView!
+  @IBOutlet weak var numberView: UILabel!
+  var maskLayer = CAShapeLayer()
+  var currentOrientation = UIDeviceOrientation.portrait
+
+  // MARK: - Capture related objects
+  private let captureSession = AVCaptureSession()
+  let captureSessionQueue = DispatchQueue(label: "com.example.apple-samplecode.CaptureSessionQueue")
+  var captureDevice: AVCaptureDevice?
+  var videoDataOutput = AVCaptureVideoDataOutput()
+  let videoDataOutputQueue = DispatchQueue(label: "com.example.apple-samplecode.VideoDataOutputQueue")
+
+  // MARK: - Region of interest (ROI) and text orientation
+  var regionOfInterest = CGRect(x: 0, y: 0, width: 1, height: 1)
+  var textOrientation = CGImagePropertyOrientation.up
+
+  // MARK: - Coordinate transforms
+  var bufferAspectRatio: Double!
+  var uiRotationTransform = CGAffineTransform.identity
+  var bottomToTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -1)
+  var roiToGlobalTransform = CGAffineTransform.identity
+
+  // Vision -> AVF coordinate transform.
+  var visionToAVFTransform = CGAffineTransform.identity
+
+  // MARK: - View controller methods
+  override func viewDidLoad() { ... }
+
+  override func viewWillTransition(
+    to size: CGSize,
+    with coordinator: UIViewControllerTransitionCoordinator
+  ) { ... }
+
+  override func viewDidLayoutSubviews() { ... }
+
+  // MARK: - Setup
+  func calculateRegionOfInterest() { ... }
+  func updateCutout() { ... }
+  func setupOrientationAndTransform() { ... }
+  func setupCamera() { ... }
+
+  // MARK: - UI drawing and interaction
+  func showString(string: String) { ... }
+  @IBAction func handleTap(_ sender: UITapGestureRecognizer) { ... }
+}
+```
+
+This is the bread and butter of our `Fast` implementation of vision framework.
