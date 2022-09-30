@@ -7,7 +7,7 @@ categories: project
 
 ## Why
 
-I like to read books. I am talking about reading a real, paperback book while lying in my bed. While reading, I often come across words I don't know. When I read articles with my mobile phone, I can just long-press the word right on the screen and look up its definition quite easily, but when I am reading an actual book, I can't do that. The best possible way for me to do is first, open google, and then type in the word by each character, and click search. This to me is just too long a process to continuously repeat it while reading a book. This also breaks the flow of reading which sucks more than not knowing an exact meaning of the word. So, I plan to come up with a tool that can help me look up words while reading a book as easily as possible.
+I like to read books. I am talking about reading a real, paperback book while lying in my bed. While reading, I often come across words I don't know. When I read articles with my mobile phone, I can just long-press the word right on the screen and look up its definition quite easily, but when I am reading an actual book, I can't do that. The best possible way for me to do is first, open google, and then type in the word by each character, and click search. This to me is just too long a process to continuously repeat while reading a book. This also breaks the flow of reading which sucks more than not knowing an exact meaning of the word. So, I plan to come up with a tool that can help me look up words while reading a book as easily as possible.
 
 ## Possiblilty
 
@@ -196,4 +196,56 @@ class ViewController: UIViewController {
 }
 ```
 
-This is the bread and butter of our `Fast` implementation of vision framework.
+This is the bread and butter of our `Fast` implementation of vision framework. Let's look at it from the top:
+
+#### #1
+
+```swift
+class ViewController: UIViewController {
+
+  // MARK: - UI objects
+  @IBOutlet weak var previewView: PreviewView! // #1
+  @IBOutlet weak var cutoutView: UIView! // #2
+  @IBOutlet weak var numberView: UILabel! // #3
+  var maskLayer = CAShapeLayer() // #4
+  var currentOrientation = UIDeviceOrientation.portrait // #5
+...
+```
+
+This section is listing out `UI Objects` that will be used inside the `ViewController`.
+
+1. An instance of `PreviewView`, meaning it is connected via the interface builder, or via `storyboard`.
+1. An instance of `UIView` from the aforementioned `storyboard`
+1. An instance of `UILabel`
+1. An instance of `CAShapeLayer`. The purpose of `CAShapeLayer` according to Apple's documentation is: _A layer that draws a cubic Bezier spline in its coordinate space._ `cubic Bezier spline` is a type of a smooth curve. So basically, `CAShapeLayer` allows programmers to draw some nice shapes on top of it.
+1. An instance to hold current device's orientation, which defaults to `portrait` right now
+
+#### #2
+
+```swift
+// MARK: - Capture related objects
+private let captureSession = AVCaptureSession() // #1
+let captureSessionQueue = DispatchQueue(label: "com.example.apple-samplecode.CaptureSessionQueue") // #2
+var captureDevice: AVCaptureDevice? // #3
+var videoDataOutput = AVCaptureVideoDataOutput() // #4
+let videoDataOutputQueue = DispatchQueue(label: "com.example.apple-samplecode.VideoDataOutputQueue") // #5
+```
+
+This section is related to making instances that are related to video capturing
+
+1. An instance of `AVCaptureSession`. This session deals with capturing video stream from the input source and process them into programmable data within the app
+1. `DispatchQueue` for capture session which allows parallel processing to not block a main thread.
+1. An instance of `AVCaptureDevice`. An object that represents a hardware or virtual capture device like a camera or microphone.
+1. An instance of `AVCaptureVideoDataOutput`. This variable holds captured data output from the camera.
+1. `DispatchQueue` for video data output.
+
+#### #3
+
+```swift
+// MARK: - Region of interest (ROI) and text orientation
+var regionOfInterest = CGRect(x: 0, y: 0, width: 1, height: 1) // #1
+var textOrientation = CGImagePropertyOrientation.up // #2
+```
+
+1. Region of video data output buffer that recognition should be run on. This part gets recalculated once the bounds of the preview layer are known. Currently defaults to a point.
+1. Orientation of text to search for in the region of interest. Defaults to reading texts considering 0th row at top, 0th column on left. Simply put, regular orientation like a blank excel sheet.
