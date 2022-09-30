@@ -249,3 +249,64 @@ var textOrientation = CGImagePropertyOrientation.up // #2
 
 1. Region of video data output buffer that recognition should be run on. This part gets recalculated once the bounds of the preview layer are known. Currently defaults to a point.
 1. Orientation of text to search for in the region of interest. Defaults to reading texts considering 0th row at top, 0th column on left. Simply put, regular orientation like a blank excel sheet.
+
+#### #4
+
+```swift
+// MARK: - Coordinate transforms
+var bufferAspectRatio: Double! // #1
+var uiRotationTransform = CGAffineTransform.identity // #2
+var bottomToTopTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -1) // #3
+var roiToGlobalTransform = CGAffineTransform.identity // #4
+
+// Vision -> AVF coordinate transform.
+var visionToAVFTransform = CGAffineTransform.identity // #5
+```
+
+1. An instance that stores `bufferAspectRatio` in `Double`. Aspect ratio meant in this context is expected width / height.
+1. `uiRotationTransform` instance is used to keep track of the rotation of capturing device. When the device is rotated, this property gets updated and necessary calculation is made accordingly.
+1. `bottomToTopTransform` is used to transform bottom-left coordinates to top-left, which is needed to handle rotated device. \* need further dissection of its usage
+1. `roiToGlobalTransform` transforms coordinates in ROI to global coordinates (still normalized). \* need further dissection of its usage
+1. `visionToAVFTransform` is used to transform full vision ROI to AVFoundation coordinate. \* need further dissection of its usage
+
+Just by looking at the variables, we can't get a full grasp of what this `ViewController` does. Let's look at other functions one-by-one.
+
+#### viewDidLoad()
+
+```swift
+override func viewDidLoad() {
+  super.viewDidLoad()
+  previewView.session = captureSession // #1
+
+
+  cutoutView.backgroundColor = UIColor.gray.withAlphaComponent(0.5) // #2
+  maskLayer.backgroundColor = UIColor.clear.cgColor // #3
+  maskLayer.fillRule = .evenOdd // #4
+  cutoutView.layer.mask = maskLayer // #5
+
+  // Starting the capture session is a blocking call. Perform setup using
+  // a dedicated serial dispatch queue to prevent blocking the main thread.
+  captureSessionQueue.async {
+    self.setupCamera()
+
+    // Calculate region of interest now that the camera is setup.
+    DispatchQueue.main.async {
+      // Figure out initial ROI.
+      self.calculateRegionOfInterest()
+    }
+  }
+}
+```
+
+`viewDidLoad()` gets called when the view is completely loaded from a `ViewController`. Swift programmers tend to put settings helper functions inside this part of the lifecycle.
+
+1. first setup `previewView` by setting the instantiated `captureSession` to `previewView`'s `session`. So when we think about it visually, `previewView` is positioned on top of the `ViewController`'s view, and this line of code allows us to see the live preview that is being captured by the camera.
+1. then we set a transparent gray colored `cutoutView` on top of the `previewView` so that ROI stands out in a clear view.
+1. `maskLayer` is our region of interest which is set as clear color.
+1. [fillRule](https://developer.apple.com/documentation/quartzcore/cashapelayerfillrule/) is set to `.evenOdd`. Which means that we use `even-odd winding rule` for this mask layer. So we can imagine that the mask layer will be clear view, emphasizing the ROI.
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Even-odd_and_non-zero_winding_fill_rules.png" width="300" height="300" style="display: block; margin: 0 auto"/>
+
+<p style="text-align: center;">even-odd winding rule (left) none-zero winding rule (right)</p>
+
+1. then we set the `maskLayer` to `cutoutView`'s masking layer.
