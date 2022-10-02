@@ -284,14 +284,9 @@ override func viewDidLoad() {
   maskLayer.fillRule = .evenOdd // #4
   cutoutView.layer.mask = maskLayer // #5
 
-  // Starting the capture session is a blocking call. Perform setup using
-  // a dedicated serial dispatch queue to prevent blocking the main thread.
-  captureSessionQueue.async {
+  captureSessionQueue.async { // #6
     self.setupCamera()
-
-    // Calculate region of interest now that the camera is setup.
-    DispatchQueue.main.async {
-      // Figure out initial ROI.
+    DispatchQueue.main.async { // #7
       self.calculateRegionOfInterest()
     }
   }
@@ -305,8 +300,172 @@ override func viewDidLoad() {
 1. `maskLayer` is our region of interest which is set as clear color.
 1. [fillRule](https://developer.apple.com/documentation/quartzcore/cashapelayerfillrule/) is set to `.evenOdd`. Which means that we use `even-odd winding rule` for this mask layer. So we can imagine that the mask layer will be clear view, emphasizing the ROI.
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Even-odd_and_non-zero_winding_fill_rules.png" width="300" height="300" style="display: block; margin: 0 auto"/>
+   <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Even-odd_and_non-zero_winding_fill_rules.png" width="300" height="300" style="display: block; margin: 0 auto"/>
 
-<p style="text-align: center;">even-odd winding rule (left) none-zero winding rule (right)</p>
+   <p style="text-align: center;">even-odd winding rule (left) none-zero winding rule (right)</p>
 
 1. then we set the `maskLayer` to `cutoutView`'s masking layer.
+1. using `captureSessionQueue`, we can move `setupCamera()` call off to a different thread, so that this heavy operation is not blocking the main thread.
+1. after camera setup is complete, we calculate the `ROI` in the main thread.
+
+#### viewWillTransitionTo(to:with:)
+
+```swift
+override func viewWillTransition(
+  to size: CGSize,
+  with coordinator: UIViewControllerTransitionCoordinator
+) {
+  super.viewWillTransition(to: size, with: coordinator)
+
+  let deviceOrientation = UIDevice.current.orientation // #1
+  if deviceOrientation.isPortrait || deviceOrientation.isLandscape { // #2
+    currentOrientation = deviceOrientation // #3
+  }
+
+  if let videoPreviewLayerConnection = previewView.videoPreviewLayer.connection { // #4
+    if let newVideoOrientation = AVCaptureVideoOrientation(deviceOrientation: deviceOrientation) { // #5
+      videoPreviewLayerConnection.videoOrientation = newVideoOrientation // #5
+    }
+  }
+  calculateRegionOfInterest() // #6
+}
+```
+
+`viewWillTransitionTo` function is called typically when device orientation changes. This can happen many times when we rotate our phone from `portrait` mode to `landscape` mode. Codes inside this function allows for the application to adapt to the change in device orientation.
+
+1. get the device's current orientation
+1. check if the current orientation is either `portrait` or `landscape`
+1. update the global variable `currentOrientation` to the current device orientation.
+1. if connection is established with `previewView`
+1. instantiate `AVCaptureVideoOrientation` with the current device orientation and unwrap it with `if let newVideoOrientation`
+1. set new device orientation in the preview layer
+1. figure out new region of interest
+
+#### viewDidLayoutSubviews()
+
+```swift
+override func viewDidLayoutSubviews() {
+  super.viewDidLayoutSubviews()
+  updateCutout() // #1
+}
+```
+
+`viewDidLayoutSubviews()` gets called whenever there is a refresh in UI. This function can be called multiple times in the `ViewController`'s lifecycle.
+
+1. whenever there is a change in UI or updates in UI we update the cutout region using `updateCutout()` helper function.
+
+#### setupCamera()
+
+Let's begin analyzing helper functions. First we go over `setupCamera()`. Since this is a relatively long function, I will comment the description of the code directly onto the code. If we need a further explanation, we'll provide the detail at the bottom.
+
+```swift
+func setupCamera() {
+
+  // #1. with the `guard let` keyword, we can determine if the running device
+  //     can be started with the `builtInWideAngleCamera`.
+  //     If it doesn't it will throw an error saying the there is no camera available
+  guard let captureDevice = AVCaptureDevice.default(
+    .builtInWideAngleCamera,
+    for: AVMediaType.video, position: .back
+  ) else {
+    print("Could not create capture device.")
+    return
+  }
+  self.captureDevice = captureDevice
+
+  if captureDevice.supportsSessionPreset(.hd4K3840x2160) {
+    // #2. if the camera supports 4k, we'll go with the 4k.
+    //     and calculate `bufferAspectRatio` accordingly
+    //     4k will consume more power, meaning more battery usage.
+    captureSession.sessionPreset = AVCaptureSession.Preset.hd4K3840x2160
+    bufferAspectRatio = 3840.0 / 2160.0
+  } else {
+    // #3. if the camera does not support 4k, we'll go with the hd
+    //     and calculate `bufferAspectRatio` accordingly
+    captureSession.sessionPreset = AVCaptureSession.Preset.hd1920x1080
+    bufferAspectRatio = 1920.0 / 1080.0
+  }
+
+  // #4. `AVCaptureDeviceInput` is used to create an object that provides media input
+  //     from a capture device to a capture session. We use `guard let` to check if we can
+  //     create this object first then move forward.
+  guard let deviceInput = try? AVCaptureDeviceInput(device: captureDevice) else {
+    print("Could not create device input.")
+    return
+  }
+
+  // #5. Then we check whether we can add input then add if possible
+  if captureSession.canAddInput(deviceInput) {
+    captureSession.addInput(deviceInput)
+  }
+
+  // #6. Begin setting video output.
+  // drop video frames if they arrive late.
+  videoDataOutput.alwaysDiscardsLateVideoFrames = true
+  // set delegate to receive video streams. Signaling to remove the load to a separate queue
+  // we created earlier to receive video data: `videoDataOutputQueue`
+  videoDataOutput.setSampleBufferDelegate(self, queue: videoDataOutputQueue)
+  // set a compression setting for video
+  videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange]
+
+  // #7. Then we check whether we can add output then add if possible
+  if captureSession.canAddOutput(videoDataOutput) {
+    captureSession.addOutput(videoDataOutput)
+    // There is a trade-off to be made here. Enabling stabilization will
+    // give temporally more stable results and should help the recognizer
+    // converge. But if it's enabled the VideoDataOutput buffers don't
+    // match what's displayed on screen, which makes drawing bounding
+    // boxes very hard. Disable it in this app to allow drawing detected
+    // bounding boxes on screen. So, it should be off.
+    videoDataOutput.connection(with: AVMediaType.video)?.preferredVideoStabilizationMode = .off
+  } else {
+    print("Could not add VDO output")
+    return
+  }
+
+  // Set zoom and autofocus to help focus on very small text.
+  do {
+    // #8 Begin setting camera for autofocus
+    // Requests exclusive access to configure device hardware properties.
+    try captureDevice.lockForConfiguration()
+    // a value of 2.0 doubles the size of an image’s subject (and halves the field of view)
+    captureDevice.videoZoomFactor = 2
+    // a value that controls the allowable range for automatic focusing.
+    captureDevice.autoFocusRangeRestriction = .near
+    // Releases exclusive control over device hardware properties.
+    captureDevice.unlockForConfiguration()
+  } catch {
+    print("Could not set zoom level due to error: \(error)")
+    return
+  }
+
+  // start camera
+  captureSession.startRunning()
+}
+```
+
+#### calculateRegionOfInterest()
+
+```swift
+func calculateRegionOfInterest() {
+  let desiredHeightRatio = 0.15
+  let desiredWidthRatio = 0.6
+  let maxPortraitWidth = 0.8
+
+  let size: CGSize
+  if currentOrientation.isPortrait || currentOrientation == .unknown {
+    size = CGSize(width: min(desiredWidthRatio * bufferAspectRatio, maxPortraitWidth), height: desiredHeightRatio / bufferAspectRatio)
+  } else {
+    size = CGSize(width: desiredWidthRatio, height: desiredHeightRatio)
+  }
+
+  regionOfInterest.origin = CGPoint(x: (1 - size.width) / 2, y: (1 - size.height) / 2)
+  regionOfInterest.size = size
+
+  setupOrientationAndTransform()
+
+  DispatchQueue.main.async {
+    self.updateCutout()
+  }
+}
+```
