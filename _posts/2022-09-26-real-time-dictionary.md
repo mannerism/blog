@@ -454,9 +454,15 @@ func calculateRegionOfInterest() {
 
   let size: CGSize
   if currentOrientation.isPortrait || currentOrientation == .unknown {
-    size = CGSize(width: min(desiredWidthRatio * bufferAspectRatio, maxPortraitWidth), height: desiredHeightRatio / bufferAspectRatio)
+    size = CGSize(
+      width: min(desiredWidthRatio * bufferAspectRatio, maxPortraitWidth),
+      height: desiredHeightRatio / bufferAspectRatio
+      )
   } else {
-    size = CGSize(width: desiredWidthRatio, height: desiredHeightRatio)
+    size = CGSize(
+      width: desiredWidthRatio,
+      height: desiredHeightRatio
+      )
   }
 
   regionOfInterest.origin = CGPoint(x: (1 - size.width) / 2, y: (1 - size.height) / 2)
