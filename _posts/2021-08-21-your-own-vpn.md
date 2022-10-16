@@ -1,17 +1,17 @@
 ---
-title:  "Open VPN을 사용하여 DIY VPN만들기. 네 VPN은 네가 만들어서 써라."
-date:   2021-08-21 08:15:00 +0900
+title: "Open VPN을 사용하여 DIY VPN만들기. 네 VPN은 네가 만들어서 써라."
+date: 2021-08-21 08:15:00 +0900
 permalink: ":categories/security/:title"
 ---
 
->원문 출처 [Wolfgang's Channel](https://www.youtube.com/watch?v=gxpX_mubz2A&t=107s&ab_channel=Wolfgang%27sChannel)
+> 원문 출처 [Wolfgang's Channel](https://www.youtube.com/watch?v=gxpX_mubz2A&t=107s&ab_channel=Wolfgang%27sChannel)
 
 ### 왜 VPN을 직접 만들어서 써야 할까?
 
 1. 인터넷이 발전함에 따라 인터넷상 개인에대한 국가의 검열이 심해지고있다.
 1. Nord VPN, Pure VPN 등 해외 내로라 하는 유료 VPN 제공자들도 'no log policy'라고 해서 로그를 가지고있지 않다곤 하는데 그건 그들의 말뿐이다. 실제로 [Pure VPN은 FBI에게 클라이언트의 로그를 제공한적 있다](https://www.zdnet.com/article/cyberstalker-thwarted-by-vpn-logs-gets-17-years-in-prison/). 내가 직접 서버를 세팅하고 로그를 저장하지 않도록 세팅을 해주는게 확실히 안전하다.
 
-    >범죄 행위를 두둔하는것은 아님을 명확하게 짚고 넘어가자.
+   > 범죄 행위를 두둔하는것은 아님을 명확하게 짚고 넘어가자.
 
 1. 대부분의 고퀄 VPN은 유료다. 굳이 돈을 써야한다면 내 서버를 구축하는데 쓰는게 덜 아깝다.
 
@@ -36,7 +36,7 @@ permalink: ":categories/security/:title"
 이 강의를 진행하는 개발 환경은 MacOS이다. 터미널을 열고 다음과 같이 입력한다.
 
 ```zsh
-  ssh-keygen -t ras -b 4096
+  ssh-keygen -t rsa -b 4096
 ```
 
 이후 패스워드를 입력하고 디폴트 디렉토리에 ssh key를 저장해 준다.
@@ -54,13 +54,13 @@ permalink: ":categories/security/:title"
 ```zsh
   The authenticity of host '139.162.103.189 (139.162.103.189)' can't be established.
   ECDSA key fingerprint is SHA256:8CE2Lqk2Nd444CIzrrgdkyTdf1pAsFkoFCVP2Hm8NQ8.
-  Are you sure you want to continue connecting (yes/no/[fingerprint])? 
+  Are you sure you want to continue connecting (yes/no/[fingerprint])?
 ```
 
 `yes`를 입력하고 `linode`서버 세팅시 설정한 비밀번호를 입력해 준다.
 
 ```zsh
-  root@localhost:~# 
+  root@localhost:~#
 ```
 
 위 처럼 방금 만든 서버에 접근한것을 확인할 수 있다.
@@ -85,7 +85,7 @@ permalink: ":categories/security/:title"
 
   I: (UUID=8cd34d89-9891-4e4e-a050-559242151b9f)
   I: Set the RESUME variable to override this.
-  root@localhost:~# 
+  root@localhost:~#
 ```
 
 동의가 필요한 경우 `y` 또는 `yes`를 입력하고 모든 설치를 완료해 준다.
@@ -103,14 +103,14 @@ permalink: ":categories/security/:title"
 입력:
 
 ```zsh
-  root@localhost:~# passwd mannerism 
+  root@localhost:~# passwd mannerism
 ```
 
 출력:
 
 ```zsh
-  New password: 
-  Retype new password: 
+  New password:
+  Retype new password:
 ```
 
 비밀번호를 두번 입력해주면 세팅이 완료된다.
@@ -128,7 +128,7 @@ permalink: ":categories/security/:title"
 출력:
 
 ```zsh
-  mannerism@139.162.103.189's password: 
+  mannerism@139.162.103.189's password:
   Number of key(s) added:        1
 
   Now try logging into the machine, with:   "ssh 'mannerism@139.162.103.189'" and check to make sure that only the key(s) you wanted were added.
@@ -141,7 +141,7 @@ permalink: ":categories/security/:title"
 ```
 
 를 입력하면 `vim` 텍스트 에디터로 세팅 파일이 열리게 된다. `vim`사용법을 모르는 사람은 좀 당황할 수 있는데 어려울거 없다. 파일이 열리면 키보드 `j`과 `k`버튼을 누르면 커서가 위/아래로 움직이고 `h`와 `l`을 누르면 좌/우로 움직인다. 커서를 움직여서 `port`로 이동하여 `i` 버튼을 누르면 이제 텍스트를 수정할 수 있게된다.
-  
+
 1. `#Port 22`를 `Port 69`으로 바꾸어 준다.
 1. `PasswordAuthentication yes`를 `PasswordAuthentication no`로 바꾸어준다.
 1. `PermitRootLogin yes`를 `PermitRootLogin no`로 바꾸어준다.
@@ -152,7 +152,7 @@ permalink: ":categories/security/:title"
 이제 다시 로컬 터미널로 돌아가서 `ssh`를 사용하여 서버에 접근이 가능한지 테스트를 해 본다.
 
 ```zsh
-  ssh -i ~/.ssh/id_rsa mannerism@139.162.103.189 -p 69 
+  ssh -i ~/.ssh/id_rsa mannerism@139.162.103.189 -p 69
 ```
 
 비밀번호를 입력하라는 메세지가 나오면 비밀번호를 입력한다. 그리고나서 서버에 접근이 가능한 것을 확인할 수 있다.
@@ -160,13 +160,13 @@ permalink: ":categories/security/:title"
 ### 기억하기 쉬운 Alias 커멘드 만들기
 
 ```zsh
-  ssh -i ~/.ssh/id_rsa mannerism@139.162.103.189 -p 69 
+  ssh -i ~/.ssh/id_rsa mannerism@139.162.103.189 -p 69
 ```
 
 이런방식으로 접근을해도 상관이 없지만 상당히 귀찮다는걸 알 수 있다. 따라서 커멘드를 간소화하기 위해 `Alias`를 만들어보자. 다음의 커멘드를 쳐서 `config`라는 파일을 `.ssh`폴더에 만들어준다.
 
 ```zsh
-  vim ~/.ssh/config 
+  vim ~/.ssh/config
 ```
 
 그리고 나서 `vim`에디터를 사용하여 다음과 같이 적어준다. 앞서 말했듯이 `i`를 눌러줘야 `insert`모드 즉 편집모드로 들어간다.
@@ -181,7 +181,7 @@ permalink: ":categories/security/:title"
 
 이제 서버에 접근할 때마다 `ssh mannerismvpn` 커멘드를 사용하여 쉽게 접근할 수 있다.
 
->팁: 로그인을 할때마다 나오는 웰컴 텍스트를 없애기 위해 `touch .hushlogin`을 하면 된다.
+> 팁: 로그인을 할때마다 나오는 웰컴 텍스트를 없애기 위해 `touch .hushlogin`을 하면 된다.
 
 ### Open VPN 설치하기
 
@@ -239,7 +239,7 @@ Select a DNS server for the clients:
 DNS server [1]: 3
 
 Enter a name for the first client:
-Name [client]: mac 
+Name [client]: mac
 
 OpenVPN installation is ready to begin.
 Press any key to continue...
