@@ -29,15 +29,15 @@ _상거래에서 발생한 것인지 아닌지를 구분하기 위해서 미지�
 
 ### 문제
 
-![problem](/assets/2022-11-09-yechang-pae-on-financial-statements/1.png)
+![problem](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/1-min.png)
 
 ### 답
 
-![answer](/assets/2022-11-09-yechang-pae-on-financial-statements/2.png)
+![answer1](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/2-min.png)
 
-![answer](/assets/2022-11-09-yechang-pae-on-financial-statements/3.png)
+![answer2](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/3-min.png)
 
-![answer](/assets/2022-11-09-yechang-pae-on-financial-statements/4.png)
+![answer3](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/4-min.png)
 
 ## 총계정원장
 
