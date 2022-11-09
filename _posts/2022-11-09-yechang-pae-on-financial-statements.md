@@ -29,12 +29,21 @@ _상거래에서 발생한 것인지 아닌지를 구분하기 위해서 미지�
 
 ### 문제
 
-![problem](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/1.png)
+![problem](/assets/2022-11-09-yechang-pae-on-financial-statements/1.png)
 
 ### 답
 
-![answer](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/2.png)
+![answer](/assets/2022-11-09-yechang-pae-on-financial-statements/2.png)
 
-![answer](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/3.png)
+![answer](/assets/2022-11-09-yechang-pae-on-financial-statements/3.png)
 
-![answer](/blog/assets/2022-11-09-yechang-pae-on-financial-statements/4.png)
+![answer](/assets/2022-11-09-yechang-pae-on-financial-statements/4.png)
+
+## 총계정원장
+
+앞서 작성한 복식부기를 기반으로 (1) 현금과 (2) 미지급금 계정원장을 작성한다. 이후에 이를 기반으로 시산표를 작성하게 된다. 플로우를 다시 한번 정리하면 다음과 같다.
+
+1. 모든 거래의 기록을 복식 부기로 분개한다.
+1. 1번을 기반으로 현금, 미지급금으로 나누어서 총계정원장을 작성
+1. 이를 기반으로 시산표를 작성
+1. 시산표에서 재무제표와 손익계산서를 떼어내서 분석한다
