@@ -6,7 +6,7 @@ permalink: ":categories/programming/:title"
 
 ## How to change Jekyll minima color theme
 
-Changing color theme might be the easiest yet most powerful UI change one can make to a website. A proper color change can increase productivity by so much as we've all witnessed in the case of night/day themes of many websites. Let's see how we can do that in our default Jekyll minima theme.
+Changing color theme might be the easiest yet most powerful UI change one can make to a website. A proper color change can increase productivity by so much as we've all witnessed in the case of night/day themes of many websites. Let's see how we can do that in our default Jekyll minqima theme.
 
 First you have to update your already added `minima` theme from the `Gemfile`.
 
