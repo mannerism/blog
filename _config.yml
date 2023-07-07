@@ -29,6 +29,8 @@ github_username: mannerism
 
 # Build settings
 theme: minima #https://rubygems.org/ and search jekyll-theme for more themes.
+# theme: minimal-mistakes-jekyll
+
 minima:
   skin: solarized-light
 plugins:
