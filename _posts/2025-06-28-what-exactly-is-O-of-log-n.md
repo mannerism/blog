@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Understanding Big O: Why Binary Search is O(log n) and Linear Search is O(n)"
-date: 2025-06-28 14:30:00 +0900
+date: 2025-06-28 10:00:00 +0900
 categories: Algorithms
 ---
 
